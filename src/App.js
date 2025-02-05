@@ -4,7 +4,7 @@ import HomePage from "./Pages/HomePage";
 import NewGroup from "./Pages/NewGroup";
 import Group from "./Pages/Group";
 import { useState } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { HashRouter as Router, Routes, Route } from "react-router-dom";
 import NewPayment from "./Pages/Payment";
 const intialMembers = [
   { Name: "Prerana", id: 1 },
