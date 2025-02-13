@@ -46,14 +46,16 @@ export default function App() {
     members.forEach((m) => {
       balances[m.Name] = 0;
     });
-
+    console.log(payments);
     payments.forEach((payment) => {
       const splitAmt = payment.price / payment.splitAmong.length;
+      console.log(splitAmt);
       balances[payment.payer] += payment.price;
       payment.splitAmong.forEach((mamberName) => {
         balances[mamberName] -= splitAmt;
       });
     });
+    console.log(balances);
     return balances;
   };
 
@@ -92,7 +94,7 @@ export default function App() {
         });
       }
       debtor.balance = roundToTwo(debtor.balance - settlementAmt);
-      creditor.balance = roundToTwo(creditors.balance - settlementAmt);
+      creditor.balance = roundToTwo(creditor.balance - settlementAmt);
       if (debtor.balance <= 0.01) debtors.shift();
       if (creditor.balance <= 0.01) creditors.shift();
     }

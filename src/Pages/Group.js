@@ -144,7 +144,9 @@ function TransactionsDetls({ transactions, currency }) {
   return (
     <>
       {transactions.length === 0 ? (
-        ""
+        <div style={{ color: "#fff", fontSize: "1.2rem" }}>
+          All debts are settled!
+        </div>
       ) : (
         <>
           <div className="debts-header">
