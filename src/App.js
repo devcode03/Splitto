@@ -1,21 +1,24 @@
-import Header from "../src/Components/Header";
-import Footer from "../src/Components/Footer";
-import HomePage from "./Pages/HomePage";
-import NewGroup from "./Pages/NewGroup";
-import Group from "./Pages/Group";
+import Header from "./components/Header";
+import Footer from "./components/Footer";
+import HomePage from "./pages/HomePage";
+import NewGroup from "./pages/NewGroup";
+import Group from "./pages/Group";
 import { useState } from "react";
 import { HashRouter as Router, Routes, Route } from "react-router-dom";
-import NewPayment from "./Pages/Payment";
+import AddNewPayment from "./pages/Payment";
+
 const intialMembers = [
   { Name: "Prerana", id: 1 },
   { Name: "Ayush", id: 2 },
   { Name: "Pranav", id: 3 },
 ];
+
 const date = new Date();
 const formattedDate = date.toLocaleDateString("en-US", {
   month: "2-digit",
   day: "2-digit",
 });
+
 const intialPayments = [
   {
     payer: "Prerana",
@@ -137,7 +140,7 @@ export default function App() {
             <Route
               path="/payment/new"
               element={
-                <NewPayment
+                <AddNewPayment
                   members={members}
                   payments={payments}
                   setPayments={setPayments}

@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import cover from "../assets/cover.webp";
-import Button from "../Components/Button";
+import Button from "../components/Button";
 
 export default function HomePage() {
   const navigate = useNavigate();

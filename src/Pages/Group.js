@@ -1,4 +1,4 @@
-import Button from "../Components/Button";
+import Button from "../components/Button";
 import { useNavigate } from "react-router-dom";
 export default function Group({
   members,
@@ -20,6 +20,7 @@ export default function Group({
             </Button>
             {IsPaymentsAvlb && <NewRegisterMsg />}
           </div>
+
           <PaymentDetails payments={payments} currency={currency} />
         </div>
         <div />

@@ -1,4 +1,3 @@
-import React, { useState } from "react";
 import logo from "../assets/logo_white_en.svg";
 export default function Header() {
   return (

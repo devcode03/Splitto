@@ -1,5 +1,5 @@
-import { useState } from "react";
-import Button from "../Components/Button";
+import { useEffect, useState } from "react";
+import Button from "../components/Button";
 import { useNavigate } from "react-router-dom";
 
 export default function NewGroup({
@@ -12,13 +12,38 @@ export default function NewGroup({
 }) {
   const [name, setName] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
-  let curr = "";
+  const [currencyList, setCurrencyList] = useState([]);
+  const [curr, setCurr] = useState("");
+
+  useEffect(function () {
+    async function fetchCurrList() {
+      try {
+        const res = await fetch(
+          "https://api.freecurrencyapi.com/v1/currencies?apikey=fca_live_qs8ovMhP2am2kETawTSuf4VFn08t1johxAYNmYY6&currencies="
+        );
+        if (!res.ok)
+          throw new Error("Something went wrong with fetching Currencies");
+
+        const data = await res.json();
+        if (data.Response === "False") throw new Error("Currencies not found");
+
+        setCurrencyList(Object.values(data.data));
+      } catch (err) {
+        if (err.name !== "AbortError") {
+          console.log(err.message);
+        }
+      }
+    }
+    fetchCurrList();
+  }, []);
+
   function handleCurrency(e) {
     const selectedCode = e.target.value;
-    curr = currency_list.find((c) => c.code === selectedCode);
-    setCurrency(curr ? curr.symbol : "");
+    const selectedCurrency = currencyList.find((c) => c.code === selectedCode);
+    setCurr(selectedCurrency ? selectedCurrency.symbol : "");
+    setCurrency(selectedCurrency ? selectedCurrency.symbol : "");
   }
-  console.log(currency);
+
   function handleMembers(e) {
     e.preventDefault();
     if (name.trim() === "") {
@@ -33,14 +58,14 @@ export default function NewGroup({
     setMembers([...members, newName]);
     setName("");
   }
+
   function handleDeleteMember(id) {
     setMembers((x) => x.filter((mem) => mem.id !== id));
   }
+
   function handleSubmit(e) {
     e.preventDefault();
 
-    console.log(members);
-    console.log();
     if (GroupName.trim() === "") {
       alert("Please enter the Group Name");
       return;
@@ -51,6 +76,7 @@ export default function NewGroup({
     }
     setIsSubmitted(true);
   }
+
   return (
     <div
       className={!isSubmitted ? "bg-a0" : "bg-d0"}
@@ -117,7 +143,7 @@ export default function NewGroup({
                   value={curr.code}
                   onChange={handleCurrency}
                 >
-                  {currency_list.map((i) => (
+                  {currencyList.map((i) => (
                     <option key={i.code} value={i.code}>
                       {i.name}
                     </option>
@@ -196,101 +222,102 @@ function Confirmation() {
     </div>
   );
 }
-const currency_list = [
-  { code: "AFA", name: "Afghan Afghani", symbol: "؋" },
-  { code: "ALL", name: "Albanian Lek", symbol: "L" },
-  { code: "DZD", name: "Algerian Dinar", symbol: "دج" },
-  { code: "AOA", name: "Angolan Kwanza", symbol: "Kz" },
-  { code: "ARS", name: "Argentine Peso", symbol: "$" },
-  { code: "AMD", name: "Armenian Dram", symbol: "֏" },
-  { code: "AWG", name: "Aruban Florin", symbol: "ƒ" },
-  { code: "AUD", name: "Australian Dollar", symbol: "A$" },
-  { code: "AZN", name: "Azerbaijani Manat", symbol: "₼" },
-  { code: "BSD", name: "Bahamian Dollar", symbol: "B$" },
-  { code: "BHD", name: "Bahraini Dinar", symbol: ".د.ب" },
-  { code: "BDT", name: "Bangladeshi Taka", symbol: "৳" },
-  { code: "BBD", name: "Barbadian Dollar", symbol: "Bds$" },
-  { code: "BYR", name: "Belarusian Ruble", symbol: "Br" },
-  { code: "BEF", name: "Belgian Franc", symbol: "FB" },
-  { code: "BZD", name: "Belize Dollar", symbol: "BZ$" },
-  { code: "BMD", name: "Bermudan Dollar", symbol: "$" },
-  { code: "BTN", name: "Bhutanese Ngultrum", symbol: "Nu." },
-  { code: "BTC", name: "Bitcoin", symbol: "₿" },
-  { code: "BOB", name: "Bolivian Boliviano", symbol: "Bs." },
-  { code: "BAM", name: "Bosnia-Herzegovina Convertible Mark", symbol: "KM" },
-  { code: "BWP", name: "Botswanan Pula", symbol: "P" },
-  { code: "BRL", name: "Brazilian Real", symbol: "R$" },
-  { code: "GBP", name: "British Pound Sterling", symbol: "£" },
-  { code: "BND", name: "Brunei Dollar", symbol: "B$" },
-  { code: "BGN", name: "Bulgarian Lev", symbol: "лв" },
-  { code: "BIF", name: "Burundian Franc", symbol: "FBu" },
-  { code: "KHR", name: "Cambodian Riel", symbol: "៛" },
-  { code: "CAD", name: "Canadian Dollar", symbol: "C$" },
-  { code: "CVE", name: "Cape Verdean Escudo", symbol: "$" },
-  { code: "KYD", name: "Cayman Islands Dollar", symbol: "$" },
-  { code: "XOF", name: "CFA Franc BCEAO", symbol: "CFA" },
-  { code: "XAF", name: "CFA Franc BEAC", symbol: "FCFA" },
-  { code: "XPF", name: "CFP Franc", symbol: "₣" },
-  { code: "CLP", name: "Chilean Peso", symbol: "$" },
-  { code: "CLF", name: "Chilean Unit of Account", symbol: "UF" },
-  { code: "CNY", name: "Chinese Yuan", symbol: "¥" },
-  { code: "COP", name: "Colombian Peso", symbol: "$" },
-  { code: "KMF", name: "Comorian Franc", symbol: "CF" },
-  { code: "CDF", name: "Congolese Franc", symbol: "FC" },
-  { code: "CRC", name: "Costa Rican Colón", symbol: "₡" },
-  { code: "HRK", name: "Croatian Kuna", symbol: "kn" },
-  { code: "CUC", name: "Cuban Convertible Peso", symbol: "$" },
-  { code: "CZK", name: "Czech Republic Koruna", symbol: "Kč" },
-  { code: "DKK", name: "Danish Krone", symbol: "kr" },
-  { code: "DJF", name: "Djiboutian Franc", symbol: "Fdj" },
-  { code: "DOP", name: "Dominican Peso", symbol: "RD$" },
-  { code: "XCD", name: "East Caribbean Dollar", symbol: "$" },
-  { code: "EGP", name: "Egyptian Pound", symbol: "£" },
-  { code: "ERN", name: "Eritrean Nakfa", symbol: "Nfk" },
-  { code: "EEK", name: "Estonian Kroon", symbol: "kr" },
-  { code: "ETB", name: "Ethiopian Birr", symbol: "Br" },
-  { code: "EUR", name: "Euro", symbol: "€" },
-  { code: "FKP", name: "Falkland Islands Pound", symbol: "£" },
-  { code: "FJD", name: "Fijian Dollar", symbol: "$" },
-  { code: "GMD", name: "Gambian Dalasi", symbol: "D" },
-  { code: "GEL", name: "Georgian Lari", symbol: "₾" },
-  { code: "DEM", name: "German Mark", symbol: "DM" },
-  { code: "GHS", name: "Ghanaian Cedi", symbol: "₵" },
-  { code: "GIP", name: "Gibraltar Pound", symbol: "£" },
-  { code: "GRD", name: "Greek Drachma", symbol: "₯" },
-  { code: "GTQ", name: "Guatemalan Quetzal", symbol: "Q" },
-  { code: "GNF", name: "Guinean Franc", symbol: "FG" },
-  { code: "GYD", name: "Guyanaese Dollar", symbol: "$" },
-  { code: "HTG", name: "Haitian Gourde", symbol: "G" },
-  { code: "HNL", name: "Honduran Lempira", symbol: "L" },
-  { code: "HKD", name: "Hong Kong Dollar", symbol: "HK$" },
-  { code: "HUF", name: "Hungarian Forint", symbol: "Ft" },
-  { code: "ISK", name: "Icelandic Króna", symbol: "kr" },
-  { code: "INR", name: "Indian Rupee", symbol: "₹" },
-  { code: "IDR", name: "Indonesian Rupiah", symbol: "Rp" },
-  { code: "IRR", name: "Iranian Rial", symbol: "﷼" },
-  { code: "IQD", name: "Iraqi Dinar", symbol: "ع.د" },
-  { code: "ILS", name: "Israeli New Sheqel", symbol: "₪" },
-  { code: "ITL", name: "Italian Lira", symbol: "₤" },
-  { code: "JMD", name: "Jamaican Dollar", symbol: "J$" },
-  { code: "JPY", name: "Japanese Yen", symbol: "¥" },
-  { code: "JOD", name: "Jordanian Dinar", symbol: "د.ا" },
-  { code: "KZT", name: "Kazakhstani Tenge", symbol: "₸" },
-  { code: "KES", name: "Kenyan Shilling", symbol: "KSh" },
-  { code: "KWD", name: "Kuwaiti Dinar", symbol: "د.ك" },
-  { code: "KGS", name: "Kyrgystani Som", symbol: "лв" },
-  { code: "LAK", name: "Laotian Kip", symbol: "₭" },
-  { code: "LVL", name: "Latvian Lats", symbol: "Ls" },
-  { code: "LBP", name: "Lebanese Pound", symbol: "ل.ل" },
-  { code: "LSL", name: "Lesotho Loti", symbol: "L" },
-  { code: "LRD", name: "Liberian Dollar", symbol: "$" },
-  { code: "LYD", name: "Libyan Dinar", symbol: "ل.د" },
-  { code: "LTC", name: "Litecoin", symbol: "Ł" },
-  { code: "LTL", name: "Lithuanian Litas", symbol: "Lt" },
-  { code: "MOP", name: "Macanese Pataca", symbol: "MOP$" },
-  { code: "MKD", name: "Macedonian Denar", symbol: "ден" },
-  { code: "MGA", name: "Malagasy Ariary", symbol: "Ar" },
-  { code: "MWK", name: "Malawian Kwacha", symbol: "MK" },
-  { code: "MYR", name: "Malaysian Ringgit", symbol: "RM" },
-  { code: "MVR", name: "Maldivian Rufiyaa", symbol: "Rf" },
-];
+
+// const currency_list = [
+//   { code: "AFA", name: "Afghan Afghani", symbol: "؋" },
+//   { code: "ALL", name: "Albanian Lek", symbol: "L" },
+//   { code: "DZD", name: "Algerian Dinar", symbol: "دج" },
+//   { code: "AOA", name: "Angolan Kwanza", symbol: "Kz" },
+//   { code: "ARS", name: "Argentine Peso", symbol: "$" },
+//   { code: "AMD", name: "Armenian Dram", symbol: "֏" },
+//   { code: "AWG", name: "Aruban Florin", symbol: "ƒ" },
+//   { code: "AUD", name: "Australian Dollar", symbol: "A$" },
+//   { code: "AZN", name: "Azerbaijani Manat", symbol: "₼" },
+//   { code: "BSD", name: "Bahamian Dollar", symbol: "B$" },
+//   { code: "BHD", name: "Bahraini Dinar", symbol: ".د.ب" },
+//   { code: "BDT", name: "Bangladeshi Taka", symbol: "৳" },
+//   { code: "BBD", name: "Barbadian Dollar", symbol: "Bds$" },
+//   { code: "BYR", name: "Belarusian Ruble", symbol: "Br" },
+//   { code: "BEF", name: "Belgian Franc", symbol: "FB" },
+//   { code: "BZD", name: "Belize Dollar", symbol: "BZ$" },
+//   { code: "BMD", name: "Bermudan Dollar", symbol: "$" },
+//   { code: "BTN", name: "Bhutanese Ngultrum", symbol: "Nu." },
+//   { code: "BTC", name: "Bitcoin", symbol: "₿" },
+//   { code: "BOB", name: "Bolivian Boliviano", symbol: "Bs." },
+//   { code: "BAM", name: "Bosnia-Herzegovina Convertible Mark", symbol: "KM" },
+//   { code: "BWP", name: "Botswanan Pula", symbol: "P" },
+//   { code: "BRL", name: "Brazilian Real", symbol: "R$" },
+//   { code: "GBP", name: "British Pound Sterling", symbol: "£" },
+//   { code: "BND", name: "Brunei Dollar", symbol: "B$" },
+//   { code: "BGN", name: "Bulgarian Lev", symbol: "лв" },
+//   { code: "BIF", name: "Burundian Franc", symbol: "FBu" },
+//   { code: "KHR", name: "Cambodian Riel", symbol: "៛" },
+//   { code: "CAD", name: "Canadian Dollar", symbol: "C$" },
+//   { code: "CVE", name: "Cape Verdean Escudo", symbol: "$" },
+//   { code: "KYD", name: "Cayman Islands Dollar", symbol: "$" },
+//   { code: "XOF", name: "CFA Franc BCEAO", symbol: "CFA" },
+//   { code: "XAF", name: "CFA Franc BEAC", symbol: "FCFA" },
+//   { code: "XPF", name: "CFP Franc", symbol: "₣" },
+//   { code: "CLP", name: "Chilean Peso", symbol: "$" },
+//   { code: "CLF", name: "Chilean Unit of Account", symbol: "UF" },
+//   { code: "CNY", name: "Chinese Yuan", symbol: "¥" },
+//   { code: "COP", name: "Colombian Peso", symbol: "$" },
+//   { code: "KMF", name: "Comorian Franc", symbol: "CF" },
+//   { code: "CDF", name: "Congolese Franc", symbol: "FC" },
+//   { code: "CRC", name: "Costa Rican Colón", symbol: "₡" },
+//   { code: "HRK", name: "Croatian Kuna", symbol: "kn" },
+//   { code: "CUC", name: "Cuban Convertible Peso", symbol: "$" },
+//   { code: "CZK", name: "Czech Republic Koruna", symbol: "Kč" },
+//   { code: "DKK", name: "Danish Krone", symbol: "kr" },
+//   { code: "DJF", name: "Djiboutian Franc", symbol: "Fdj" },
+//   { code: "DOP", name: "Dominican Peso", symbol: "RD$" },
+//   { code: "XCD", name: "East Caribbean Dollar", symbol: "$" },
+//   { code: "EGP", name: "Egyptian Pound", symbol: "£" },
+//   { code: "ERN", name: "Eritrean Nakfa", symbol: "Nfk" },
+//   { code: "EEK", name: "Estonian Kroon", symbol: "kr" },
+//   { code: "ETB", name: "Ethiopian Birr", symbol: "Br" },
+//   { code: "EUR", name: "Euro", symbol: "€" },
+//   { code: "FKP", name: "Falkland Islands Pound", symbol: "£" },
+//   { code: "FJD", name: "Fijian Dollar", symbol: "$" },
+//   { code: "GMD", name: "Gambian Dalasi", symbol: "D" },
+//   { code: "GEL", name: "Georgian Lari", symbol: "₾" },
+//   { code: "DEM", name: "German Mark", symbol: "DM" },
+//   { code: "GHS", name: "Ghanaian Cedi", symbol: "₵" },
+//   { code: "GIP", name: "Gibraltar Pound", symbol: "£" },
+//   { code: "GRD", name: "Greek Drachma", symbol: "₯" },
+//   { code: "GTQ", name: "Guatemalan Quetzal", symbol: "Q" },
+//   { code: "GNF", name: "Guinean Franc", symbol: "FG" },
+//   { code: "GYD", name: "Guyanaese Dollar", symbol: "$" },
+//   { code: "HTG", name: "Haitian Gourde", symbol: "G" },
+//   { code: "HNL", name: "Honduran Lempira", symbol: "L" },
+//   { code: "HKD", name: "Hong Kong Dollar", symbol: "HK$" },
+//   { code: "HUF", name: "Hungarian Forint", symbol: "Ft" },
+//   { code: "ISK", name: "Icelandic Króna", symbol: "kr" },
+//   { code: "INR", name: "Indian Rupee", symbol: "₹" },
+//   { code: "IDR", name: "Indonesian Rupiah", symbol: "Rp" },
+//   { code: "IRR", name: "Iranian Rial", symbol: "﷼" },
+//   { code: "IQD", name: "Iraqi Dinar", symbol: "ع.د" },
+//   { code: "ILS", name: "Israeli New Sheqel", symbol: "₪" },
+//   { code: "ITL", name: "Italian Lira", symbol: "₤" },
+//   { code: "JMD", name: "Jamaican Dollar", symbol: "J$" },
+//   { code: "JPY", name: "Japanese Yen", symbol: "¥" },
+//   { code: "JOD", name: "Jordanian Dinar", symbol: "د.ا" },
+//   { code: "KZT", name: "Kazakhstani Tenge", symbol: "₸" },
+//   { code: "KES", name: "Kenyan Shilling", symbol: "KSh" },
+//   { code: "KWD", name: "Kuwaiti Dinar", symbol: "د.ك" },
+//   { code: "KGS", name: "Kyrgystani Som", symbol: "лв" },
+//   { code: "LAK", name: "Laotian Kip", symbol: "₭" },
+//   { code: "LVL", name: "Latvian Lats", symbol: "Ls" },
+//   { code: "LBP", name: "Lebanese Pound", symbol: "ل.ل" },
+//   { code: "LSL", name: "Lesotho Loti", symbol: "L" },
+//   { code: "LRD", name: "Liberian Dollar", symbol: "$" },
+//   { code: "LYD", name: "Libyan Dinar", symbol: "ل.د" },
+//   { code: "LTC", name: "Litecoin", symbol: "Ł" },
+//   { code: "LTL", name: "Lithuanian Litas", symbol: "Lt" },
+//   { code: "MOP", name: "Macanese Pataca", symbol: "MOP$" },
+//   { code: "MKD", name: "Macedonian Denar", symbol: "ден" },
+//   { code: "MGA", name: "Malagasy Ariary", symbol: "Ar" },
+//   { code: "MWK", name: "Malawian Kwacha", symbol: "MK" },
+//   { code: "MYR", name: "Malaysian Ringgit", symbol: "RM" },
+//   { code: "MVR", name: "Maldivian Rufiyaa", symbol: "Rf" },
+// ];
