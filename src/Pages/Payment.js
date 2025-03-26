@@ -1,20 +1,24 @@
 import { useState } from "react";
 import Button from "../components/Button";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 
-export default function AddNewPayment({
-  members,
-  payments,
-  setPayments,
-  currency,
-}) {
+export default function AddNewPayment({ groups = [], setGroups }) {
   const navigate = useNavigate();
-
   const [payer, setPayer] = useState("");
   const [paymentOf, setPaymentOf] = useState("");
   const [price, setPrice] = useState("");
   const [selectedMembers, setSelectedMembers] = useState([]);
   const [isChecked, setIsChecked] = useState(true);
+  const { id } = useParams();
+  console.log(id);
+  const group = groups.find((g) => g.groupID === id);
+  console.log("group", group);
+
+  if (!group) {
+    return <div>Group not found</div>;
+  }
+
+  const { members = [], currency, payments = [] } = group;
 
   // let isDisabled = false;
   function onChange(MemName) {
@@ -27,10 +31,6 @@ export default function AddNewPayment({
   }
   function handleSave(e) {
     e.preventDefault();
-    console.log(payer);
-    console.log(price);
-    console.log(selectedMembers);
-    console.log(selectedMembers.length);
     if (!payer || !paymentOf || !price || selectedMembers.length === 0) {
       alert("Please fill all the fields and select atleast one friend.");
       return;
@@ -49,14 +49,17 @@ export default function AddNewPayment({
       splitAmong: selectedMembers,
       date: formattedDate,
     };
-    const updatedPayments = [...payments, newPayment];
-    setPayments(updatedPayments);
+    // Update the groups state
+    setGroups((prevGroups) =>
+      prevGroups.map((g) =>
+        g.groupID === id ? { ...g, payments: [...g.payments, newPayment] } : g
+      )
+    );
     setPayer("");
     setPaymentOf("");
     setPrice("");
     setSelectedMembers([]);
-    console.log("hi");
-    navigate("/groupPage");
+    navigate(`/groupPage/${id}`);
   }
 
   return (
@@ -72,8 +75,8 @@ export default function AddNewPayment({
             >
               <option value="PAO">Pick a member</option>
               {members.map((m) => (
-                <option value={m.Name} key={m.id}>
-                  {m.Name}
+                <option value={m.name} key={m.id}>
+                  {m.name}
                 </option>
               ))}
             </select>
@@ -123,14 +126,14 @@ export default function AddNewPayment({
                       className="checkbox__input"
                       type="checkbox"
                       id={`checkbox-${m.id}`}
-                      onChange={() => onChange(m.Name)}
+                      onChange={() => onChange(m.name)}
                     />
                     <svg className="checkbox__check" width="24" height="24">
                       <polyline points="20 6 9 17 4 12"></polyline>
                     </svg>
                     <div style={{ lineHeight: "1.25rem", marginLeft: "1rem" }}>
                       <span style={{ display: "block", fontSize: "1rem" }}>
-                        {m.Name}
+                        {m.name}
                       </span>
                     </div>
                   </label>
@@ -142,7 +145,9 @@ export default function AddNewPayment({
         <div style={{ paddingBottom: "0 1.25rem 1.25rem" }}>
           <div style={{ marginBottom: "2.5rem" }}>
             <Button onClick={handleSave}>Save</Button>
-            <Button onClick={() => navigate("/groupPage")}>Back</Button>
+            <Link to={`/groupPage/${id}`} className="link-cta">
+              <Button>Back</Button>
+            </Link>
           </div>
         </div>
       </div>

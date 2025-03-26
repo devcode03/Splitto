@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import Button from "../components/Button";
 import { useNavigate } from "react-router-dom";
-
+const KEY = "fca_live_qs8ovMhP2am2kETawTSuf4VFn08t1johxAYNmYY6";
 export default function NewGroup({
   setCurrency,
   currency,
@@ -19,7 +19,7 @@ export default function NewGroup({
     async function fetchCurrList() {
       try {
         const res = await fetch(
-          "https://api.freecurrencyapi.com/v1/currencies?apikey=fca_live_qs8ovMhP2am2kETawTSuf4VFn08t1johxAYNmYY6&currencies="
+          `https://api.freecurrencyapi.com/v1/currencies?apikey=${KEY}&currencies=`
         );
         if (!res.ok)
           throw new Error("Something went wrong with fetching Currencies");
@@ -30,7 +30,7 @@ export default function NewGroup({
         setCurrencyList(Object.values(data.data));
       } catch (err) {
         if (err.name !== "AbortError") {
-          console.log(err.message);
+          // ...existing code...
         }
       }
     }

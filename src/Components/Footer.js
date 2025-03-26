@@ -1,4 +1,5 @@
 export default function Footer() {
+  const currentYear = new Date().getFullYear();
   return (
     <footer>
       <div className="footer-col">
@@ -12,7 +13,7 @@ export default function Footer() {
           <a href="/">About</a>
         </div>
       </div>
-      <small>© 2025 Spliito</small>
+      <small>© {currentYear} Spliito</small>
     </footer>
   );
 }

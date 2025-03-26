@@ -6,7 +6,6 @@ const calculateBalances = (payments, members) => {
 
   payments.forEach((payment) => {
     const splitAmt = payment.price / payment.splitAmong.length;
-    console.log(splitAmt);
     balances[payment.payer] += payment.price;
     payment.splitAmong.forEach((memberId) => {
       const member = members.find((m) => m.id === memberId);
@@ -31,23 +30,18 @@ const calculateBalances = (payments, members) => {
 //     //   ? sharedWith.length
 //     //   : sharedWith.length + 1;
 //     const share = amount / sharedWith.length;
-//     console.log(share);
 //     // The payer pays the full amount, but gets reimbursed by others
 //     balances[payer] += amount;
-//     console.log(balances);
 //     // Deduct the share from each member (including payer if needed)
 //     sharedWith.forEach((friend) => {
 //       balances[friend] -= share;
 //     });
-//     console.log(balances);
 
 //     // If payer is not included in sharedWith, subtract their share as well
 //     // if (!sharedWith.includes(payer)) {
 //     //   balances[payer] -= share;
 //     // }
 //   });
-//   console.log("final balance: ");
-//   console.log(balances);
 //   return simplifyDebts(balances);
 // };
 
@@ -95,4 +89,4 @@ const payments = [
 
 const members = ["Alice", "Bob", "Charlie"];
 
-console.log(calculateBalances(payments, members));
+calculateBalances(payments, members);

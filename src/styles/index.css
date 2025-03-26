@@ -154,13 +154,13 @@ button,
   padding-top: 1rem;
   padding-bottom: 1rem;
   margin-top: 2.5rem;
-  text-transform: none;
+  text-transform: uppercase;
 
   border-width: 1px;
   border-radius: 9999px;
   cursor: pointer;
   background: var(--clr-primary-a20);
-
+  color: var(--clr-light-a0);
   outline: 2px solid transparent;
   outline-offset: 2px;
 }
@@ -237,6 +237,11 @@ button,
   color: #555;
 }
 
+.link-cta:link,
+.link-cta:visited {
+  text-decoration: none;
+  color: inherit;
+}
 /*New Group*/
 .bg-a0 {
   background-color: var(--clr-surface-a10);
@@ -566,4 +571,15 @@ small {
   font-size: 1rem;
   grid-column: span 4 / span 4;
   text-align: right;
+}
+
+.settled-message {
+  color: #fff;
+  font-size: 1.2rem;
+  text-align: center;
+  padding: 1.25rem;
+  background-color: #008000; /* Green background to indicate success */
+  border-radius: 8px;
+  margin-top: 1.25rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }

@@ -1,64 +1,114 @@
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import HomePage from "./pages/HomePage";
-import NewGroup from "./pages/NewGroup";
+// import NewGroup from "./pages/NewGroup";
+import NewGroup from "./pages/NewGroup-v2";
+
 import Group from "./pages/Group";
 import { useState } from "react";
 import { HashRouter as Router, Routes, Route } from "react-router-dom";
 import AddNewPayment from "./pages/Payment";
+import GroupList from "./components/GroupList";
 
-const intialMembers = [
-  { Name: "Prerana", id: 1 },
-  { Name: "Ayush", id: 2 },
-  { Name: "Pranav", id: 3 },
-];
-
-const date = new Date();
-const formattedDate = date.toLocaleDateString("en-US", {
-  month: "2-digit",
-  day: "2-digit",
-});
-
-const intialPayments = [
+const intialGroups = [
   {
-    payer: "Prerana",
-    paymentOf: "ABC",
-    price: 3000,
-    splitAmong: ["Ayush", "Pranav"],
-    date: formattedDate,
+    groupID: "73aaefec-b8be-4260-bb97-83a32d91e0fe",
+    name: "test",
+    currency: "$",
+    createDt: "03/25",
+    members: [
+      { id: "LgZk41Tc", name: "q" },
+      { id: "nJBgFer0", name: "sa" },
+    ],
+    payments: [
+      {
+        date: "03/25",
+        id: "28f77dd9-f7b8-4eec-9bfd-6d91f0520c1f",
+        payer: "q",
+        paymentOf: "ass",
+        price: 1000,
+        splitAmong: ["q", "sa"],
+      },
+    ],
   },
   {
-    payer: "Ayush",
-    paymentOf: "test2",
-    price: 5000,
-    splitAmong: ["Prerana", "Pranav"],
-    date: formattedDate,
+    groupID: "73aaefec-b8be-4260-bb97-83a32d91e0as",
+    name: "test2",
+    currency: "$",
+    createDt: "03/25",
+    members: [
+      { id: "LgZk41Tc", name: "q" },
+      { id: "nJBgFer0", name: "sa" },
+    ],
+    payments: [
+      {
+        date: "03/25",
+        id: "28f77dd9-f7b8-4eec-9bfd-6d91f0520c1f",
+        payer: "q",
+        paymentOf: "ass",
+        price: 1000,
+        splitAmong: ["q", "sa"],
+      },
+    ],
+  },
+  {
+    groupID: "73aaefec-b8be-4260-bb97-83a32d91e011",
+    name: "test3",
+    currency: "$",
+    createDt: "03/25",
+    members: [
+      { id: "LgZk41Tc", name: "q" },
+      { id: "nJBgFer0", name: "sa" },
+    ],
+    payments: [
+      {
+        date: "03/25",
+        id: "28f77dd9-f7b8-4eec-9bfd-6d91f0520c1f",
+        payer: "q",
+        paymentOf: "ass",
+        price: 1000,
+        splitAmong: ["q", "sa"],
+      },
+    ],
+  },
+  {
+    groupID: "73aaefec-b8be-4260-bb97-83a32d91eassas",
+    name: "test4",
+    currency: "$",
+    createDt: "03/25",
+    members: [
+      { id: "LgZk41Tc", name: "q" },
+      { id: "nJBgFer0", name: "sa" },
+    ],
+    payments: [
+      {
+        date: "03/25",
+        id: "28f77dd9-f7b8-4eec-9bfd-6d91f0520c1f",
+        payer: "q",
+        paymentOf: "ass",
+        price: 1000,
+        splitAmong: ["q", "sa"],
+      },
+    ],
   },
 ];
-
-const intialGroupName = "Manali";
 
 export default function App() {
-  const [members, setMembers] = useState([]);
-  const [currency, setCurrency] = useState("");
-  const [group, setGroup] = useState("");
-  const [payments, setPayments] = useState([]);
+  const [groups, setGroups] = useState([]);
+  // const [groups, setGroups] = useState(intialGroups);
 
   const calculateBalances = (payments, members) => {
     const balances = {};
     members.forEach((m) => {
-      balances[m.Name] = 0;
+      balances[m.name] = 0;
     });
-    console.log(payments);
     payments.forEach((payment) => {
       const splitAmt = payment.price / payment.splitAmong.length;
-      console.log(splitAmt);
       balances[payment.payer] += payment.price;
       payment.splitAmong.forEach((mamberName) => {
         balances[mamberName] -= splitAmt;
       });
     });
-    console.log(balances);
     return balances;
   };
 
@@ -103,50 +153,41 @@ export default function App() {
     }
     return transactions;
   };
-  const balances = calculateBalances(payments, members);
-  const transactions = settleDebts(balances);
+
+  // const balances = calculateBalances(payments, members);
+  // const transactions = settleDebts(balances);
+
   return (
     <Router>
       <div className=" mx-auto App">
-        <Header />
+        <Header reset />
         <div style={{ minHeight: "80vh" }}>
           <Routes>
-            <Route path="/" element={<HomePage />} />
             <Route
-              path="/new-group"
+              index
               element={
-                <NewGroup
-                  GroupName={group}
-                  setGroupName={setGroup}
-                  members={members}
-                  setMembers={setMembers}
-                  currency={currency}
-                  setCurrency={setCurrency}
-                />
+                <HomePage groups={groups}>
+                  {groups.length > 0 && <GroupList groups={groups} />}
+                </HomePage>
               }
             />
             <Route
-              path="/groupPage"
+              path="newGroup"
+              element={<NewGroup setGroups={setGroups} />}
+            />
+            <Route
+              path="groupPage/:id"
               element={
                 <Group
-                  members={members}
-                  group={group}
-                  payments={payments}
-                  transactions={transactions}
-                  currency={currency}
+                  groups={groups}
+                  calculateBalances={calculateBalances}
+                  settleDebts={settleDebts}
                 />
               }
             />
             <Route
-              path="/payment/new"
-              element={
-                <AddNewPayment
-                  members={members}
-                  payments={payments}
-                  setPayments={setPayments}
-                  currency={currency}
-                />
-              }
+              path="addPayment/:id"
+              element={<AddNewPayment groups={groups} setGroups={setGroups} />}
             />
           </Routes>
         </div>

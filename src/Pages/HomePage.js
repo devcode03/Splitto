@@ -1,18 +1,19 @@
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import cover from "../assets/cover.webp";
 import Button from "../components/Button";
+import GroupList from "../components/GroupList";
 
-export default function HomePage() {
-  const navigate = useNavigate();
+export default function HomePage({ groups, children }) {
   return (
     <div>
-      <HeroSection navigate={navigate} />
+      <HeroSection />
+      {children}
       <FeatureList />
     </div>
   );
 }
 
-function HeroSection({ navigate }) {
+function HeroSection() {
   return (
     <div>
       <div className="hero">
@@ -28,7 +29,9 @@ function HeroSection({ navigate }) {
           tolls? Spliito is a free service that simplifies the hassle of
           splitting bills on trips.
         </p>
-        <Button onClick={() => navigate("/new-group")}>Get Started</Button>
+        <Link to="/newGroup" className="link-cta">
+          <Button>Get Started</Button>
+        </Link>
       </div>
       <img src={cover} alt="cover"></img>
     </div>

@@ -1,30 +1,37 @@
 import Button from "../components/Button";
-import { useNavigate } from "react-router-dom";
-export default function Group({
-  members,
-  group,
-  payments,
-  transactions,
-  currency,
-}) {
-  let navigate = useNavigate();
-  let IsPaymentsAvlb = payments.length === 0;
+import { Link, Outlet, useNavigate, useParams } from "react-router-dom";
+
+export default function Group({ groups, calculateBalances, settleDebts }) {
+  const { id } = useParams();
+  const group = groups.find((g) => g.groupID === id);
+  if (!group) {
+    return <div>Loading...</div>;
+  }
+  const { payments = [], members = [], currency, name } = group;
+
+  const balances = calculateBalances(payments, members);
+  const transactions = settleDebts(balances);
+
+  let hasPayments = payments.length === 0;
   return (
     <>
-      <GroupHeader groupName={group} members={members} />
+      <GroupHeader groupName={name} members={members} />
       <div style={{ padding: "1.25rem" }} className="bg-a0 ">
         <div style={{ marginTop: "1.25rem", marginBottom: "1.25rem" }}>
-          <div style={{ marginTop: "1.25rem" }}>
-            <Button onClick={() => navigate("/payment/new")}>
-              Add a payment
-            </Button>
-            {IsPaymentsAvlb && <NewRegisterMsg />}
-          </div>
+          <Link
+            to={`/addPayment/${id}`}
+            className="link-cta"
+            style={{ marginTop: "1.25rem" }}
+          >
+            <Button>Add a payment💲</Button>
+          </Link>
+          {hasPayments && <NewRegisterMsg />}
 
           <PaymentDetails payments={payments} currency={currency} />
         </div>
-        <div />
-        <TransactionsDetls transactions={transactions} currency={currency} />
+        {!hasPayments && (
+          <TransactionsDetls transactions={transactions} currency={currency} />
+        )}
       </div>
     </>
   );
@@ -49,7 +56,11 @@ function GroupHeader({ groupName, members }) {
           </a>
         </button>
       </div>
-      <span>{members.map((member) => member.Name).join("・")}</span>
+      <span>
+        {Object.entries(members)
+          .map(([key, member]) => member.name)
+          .join(" • ")}
+      </span>
     </div>
   );
 }
@@ -142,39 +153,32 @@ function PaymentDetails({ payments, currency }) {
 }
 
 function TransactionsDetls({ transactions, currency }) {
+  if (transactions.length === 0) {
+    return <div className="settled-message">💰 Settled! 🎉</div>;
+  }
   return (
     <>
-      {transactions.length === 0 ? (
-        <div style={{ color: "#fff", fontSize: "1.2rem" }}>
-          All debts are settled!
-        </div>
-      ) : (
-        <>
-          <div className="debts-header">
-            <h4 style={{ fontWeight: "700", margin: "0" }}>
-              How to Settle Debts
-            </h4>
-            <button style={{ fontSize: "0.9rem", color: "#717171" }}>
-              Copy for Share
-            </button>
+      <div className="debts-header">
+        <h4 style={{ fontWeight: "700", margin: "0" }}>How to Settle Debts</h4>
+        <button style={{ fontSize: "0.9rem", color: "#717171" }}>
+          Copy for Share
+        </button>
+      </div>
+      <div>
+        {transactions.map((trxn, idx) => (
+          <div className="debt-tile" key={idx}>
+            <div style={{ gridColumn: "span 8 / span 8" }}>
+              <span>
+                {trxn.from} → {trxn.to}
+              </span>
+            </div>
+            <div className="trxn-amt">
+              {currency}
+              {trxn.amount}
+            </div>
           </div>
-          <div>
-            {transactions.map((trxn, idx) => (
-              <div className="debt-tile" key={idx}>
-                <div style={{ gridColumn: "span 8 / span 8" }}>
-                  <span>
-                    {trxn.from} → {trxn.to}
-                  </span>
-                </div>
-                <div className="trxn-amt">
-                  {currency}
-                  {trxn.amount}
-                </div>
-              </div>
-            ))}
-          </div>
-        </>
-      )}
+        ))}
+      </div>
     </>
   );
 }
