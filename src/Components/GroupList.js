@@ -1,6 +1,12 @@
 import { Link } from "react-router-dom";
 import styles from "./GroupList.module.css";
-export default function GroupList({ groups = [] }) {
+import { useGroups } from "../Contexts/GroupContext";
+export default function GroupList() {
+  const { groups } = useGroups();
+
+  if (!groups || groups.length === 0) {
+    return null;
+  }
   return (
     <div style={{ padding: "1.75rem" }}>
       <h2 className={styles.title}>Recent Groups</h2>

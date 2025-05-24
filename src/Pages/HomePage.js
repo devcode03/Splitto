@@ -1,9 +1,9 @@
 import { Link } from "react-router-dom";
 import cover from "../assets/cover.webp";
-import Button from "../components/Button";
-import GroupList from "../components/GroupList";
+import Button from "../Components/Button";
+import GroupList from "../Components/GroupList";
 
-export default function HomePage({ groups, children }) {
+export default function HomePage({ children }) {
   return (
     <div>
       <HeroSection />
@@ -29,9 +29,11 @@ function HeroSection() {
           tolls? Spliito is a free service that simplifies the hassle of
           splitting bills on trips.
         </p>
-        <Link to="/newGroup" className="link-cta">
-          <Button>Get Started</Button>
-        </Link>
+        <div style={{ display: "flex", justifyContent: "center" }}>
+          <Link to="/newGroup" className="link-cta">
+            <Button>Get Started</Button>
+          </Link>
+        </div>
       </div>
       <img src={cover} alt="cover"></img>
     </div>
@@ -77,6 +79,13 @@ function FeatureList() {
           <p>{li.description}</p>
         </div>
       ))}
+      <div
+        style={{ display: "flex", justifyContent: "center", marginTop: "20px" }}
+      >
+        <Link to="/newGroup" className="link-cta">
+          <Button>Get Started</Button>
+        </Link>
+      </div>
     </section>
   );
 }

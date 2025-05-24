@@ -146,14 +146,16 @@ button,
   background-image: none;
 }
 .cta-button {
-  width: 100%;
+  width: auto; /* Changed from 100% */
+  min-width: 120px;
   display: flex;
   justify-content: center;
+  align-items: center; /* Vertically center content */
+
   font-size: 1rem;
   font-weight: 700;
-  padding-top: 1rem;
-  padding-bottom: 1rem;
-  margin-top: 2.5rem;
+  padding: 0.75rem 2rem; /* Compact vertical padding, more horizontal */
+  margin-top: 0;  
   text-transform: uppercase;
 
   border-width: 1px;
@@ -164,8 +166,18 @@ button,
   outline: 2px solid transparent;
   outline-offset: 2px;
 }
-.cta-button div {
-  margin-left: 0.25rem;
+.cta-button:hover:not(:disabled) {
+  background: var(--clr-primary-a30);
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 4px 16px rgba(130, 78, 251, 0.15);
+}
+.cta-button:active:not(:disabled) {
+  background: var(--clr-primary-a10);
+  transform: scale(0.98);
+}
+.cta-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 /* Features Section */
@@ -582,4 +594,27 @@ small {
   border-radius: 8px;
   margin-top: 1.25rem;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+.form-card {
+  background: #232323;
+  border-radius: 1rem;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+  padding: 2rem;
+  margin: 2rem 0;
+}
+.input-currency-wrapper {
+  position: relative;
+  width: 100%;
+}
+.input-currency-symbol {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--clr-surface-a50);
+  pointer-events: none;
+  font-size: 1rem;
+}
+.input-currency {
+  padding-left: 2rem !important;
 }

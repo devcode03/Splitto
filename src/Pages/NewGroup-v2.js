@@ -1,13 +1,20 @@
-import { use, useEffect, useId, useState } from "react";
-import Button from "../components/Button";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import Button from "../Components/Button";
+import { Link } from "react-router-dom";
 import { nanoid } from "nanoid";
+import { useGroups } from "../Contexts/GroupContext";
 
 const KEY = "fca_live_qs8ovMhP2am2kETawTSuf4VFn08t1johxAYNmYY6";
-export default function NewGroup({ setGroups }) {
+
+export default function NewGroup() {
+  const { setGroups } = useGroups();
   const [groupName, setGroupName] = useState("");
   const [members, setMembers] = useState([]);
-  const [currency, setCurrency] = useState("$");
+  const [currency, setCurrency] = useState({
+    code: "USD",
+    symbol: "$",
+    name: "US Dollar",
+  });
   const [groupId, setGroupId] = useState("");
   const [name, setName] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -25,22 +32,32 @@ export default function NewGroup({ setGroups }) {
 
         const data = await res.json();
         if (data.Response === "False") throw new Error("Currencies not found");
-        console.log("fetched currency list: ", data);
-
-        setCurrencyList(Object.values(data.data));
+        // Convert object to array of {code, symbol, name}
+        const currencies = Object.entries(data.data).map(([code, obj]) => ({
+          code,
+          symbol: obj.symbol_native || obj.symbol || "$",
+          name: obj.name,
+        }));
+        setCurrencyList(currencies);
+        // Set default currency if not set
+        if (!currency.code && currencies.length > 0) {
+          setCurrency(currencies[0]);
+        }
       } catch (err) {
         console.error(err.message);
       }
     }
     fetchCurrList();
+    // eslint-disable-next-line
   }, []);
 
   //handle currency selection
   function handleCurrency(e) {
     const selectedCode = e.target.value;
     const selectedCurrency = currencyList.find((c) => c.code === selectedCode);
-    setCurrency(selectedCurrency ? selectedCurrency.symbol : "");
+    if (selectedCurrency) setCurrency(selectedCurrency);
   }
+
   // Add member to the group
   function handleMembers(e) {
     e.preventDefault();
@@ -52,13 +69,10 @@ export default function NewGroup({ setGroups }) {
       name: name.trim(),
       id: nanoid(8),
     };
-    setMembers((prev) => {
-      const updatedMember = [...prev, newMember];
-      console.log("updated members list :", updatedMember);
-      return updatedMember;
-    });
+    setMembers((prev) => [...prev, newMember]);
     setName("");
   }
+
   //handle delete member
   function handleDeleteMember(id) {
     setMembers((x) => x.filter((mem) => mem.id !== id));
@@ -69,8 +83,7 @@ export default function NewGroup({ setGroups }) {
     e.preventDefault();
 
     if (!groupName.trim()) return alert("Please enter the Group Name");
-
-    if (members.length < 2) return alert("Add two or more members/firends");
+    if (members.length < 2) return alert("Add two or more members/friends");
     const groupID = crypto.randomUUID();
     const newGroup = {
       groupID,
@@ -84,11 +97,7 @@ export default function NewGroup({ setGroups }) {
         year: "numeric",
       }),
     };
-    setGroups((prev) => {
-      const updatedGroups = [...prev, newGroup];
-      console.log("updated group:", updatedGroups);
-      return updatedGroups;
-    });
+    setGroups((prev) => [...prev, newGroup]);
     setGroupId(groupID);
     setIsSubmitted(true);
   }
@@ -163,18 +172,19 @@ export default function NewGroup({ setGroups }) {
                 >
                   {currencyList.map((i) => (
                     <option key={i.code} value={i.code}>
-                      {i.name}
+                      {i.name} ({i.symbol})
                     </option>
                   ))}
                 </select>
               </div>
             </li>
-            <li>
-              <Button>Create a group</Button>
-            </li>
+            <li></li>
           </ul>
+          <div style={{ display: "flex", justifyContent: "center" }}>
+            <Button>Create a group</Button>
+          </div>
         </form>
-      )}{" "}
+      )}
     </div>
   );
 }
@@ -286,10 +296,11 @@ function Confirmation({ groupID, groupName }) {
           </button>
         </div>
       </div>
-
-      <Link to={`/groupPage/${groupID}?${groupName}`} className="link-cta">
-        <Button>Go to your Group Page!</Button>
-      </Link>
+      <div style={{ display: "flex", justifyContent: "center" }}>
+        <Link to={`/groupPage/${groupID}?${groupName}`} className="link-cta">
+          <Button>Go to your Group Page!</Button>
+        </Link>
+      </div>
     </div>
   );
 }

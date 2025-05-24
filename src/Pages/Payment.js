@@ -1,8 +1,10 @@
-import { useState } from "react";
-import Button from "../components/Button";
+import { useEffect, useState } from "react";
+import Button from "../Components/Button";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { useGroups } from "../Contexts/GroupContext";
 
-export default function AddNewPayment({ groups = [], setGroups }) {
+export default function AddNewPayment() {
+  const { groups, setGroups } = useGroups();
   const navigate = useNavigate();
   const [payer, setPayer] = useState("");
   const [paymentOf, setPaymentOf] = useState("");
@@ -13,12 +15,23 @@ export default function AddNewPayment({ groups = [], setGroups }) {
   console.log(id);
   const group = groups.find((g) => g.groupID === id);
   console.log("group", group);
+  // ...existing code...
 
+  const { members = [], currency, payments = [] } = group;
+
+  const allSelected = selectedMembers.length === members.length;
+  function handleSelectAll() {
+    setSelectedMembers(allSelected ? [] : members.map((m) => m.name));
+  }
+  useEffect(() => {
+    if (members.length > 0) {
+      setPayer(members[0].name);
+      setSelectedMembers(members.map((m) => m.name));
+    }
+  }, [members]);
   if (!group) {
     return <div>Group not found</div>;
   }
-
-  const { members = [], currency, payments = [] } = group;
 
   // let isDisabled = false;
   function onChange(MemName) {
@@ -29,6 +42,7 @@ export default function AddNewPayment({ groups = [], setGroups }) {
     );
     setIsChecked(!isChecked);
   }
+
   function handleSave(e) {
     e.preventDefault();
     if (!payer || !paymentOf || !price || selectedMembers.length === 0) {
@@ -64,7 +78,7 @@ export default function AddNewPayment({ groups = [], setGroups }) {
 
   return (
     <div className="bg-a0">
-      <div style={{ padding: "1.25rem" }}>
+      <div className="form-card">
         <div style={{ marginBottom: "1.25rem" }}>
           <div style={{ marginBottom: ".5rem", fontSize: ".9rem" }}>Payer</div>
           <div>
@@ -73,7 +87,6 @@ export default function AddNewPayment({ groups = [], setGroups }) {
               defaultValue={payer}
               onChange={(e) => setPayer(e.target.value)}
             >
-              <option value="PAO">Pick a member</option>
               {members.map((m) => (
                 <option value={m.name} key={m.id}>
                   {m.name}
@@ -100,7 +113,7 @@ export default function AddNewPayment({ groups = [], setGroups }) {
           <div style={{ marginBottom: ".5rem", fontSize: ".9rem" }}>Price</div>
           <div>
             <div style={{ width: "100%", display: "flex" }}>
-              <div className="rs-btn">{currency}</div>
+              <div className="rs-btn">{currency.symbol}</div>
               <input
                 type="number"
                 placeholder="980"
@@ -114,9 +127,35 @@ export default function AddNewPayment({ groups = [], setGroups }) {
           </div>
         </div>
         <div style={{ marginBottom: "2rem" }}>
-          <div style={{ marginBottom: ".5rem", fontSize: ".9rem" }}>
+          <div
+            style={{
+              marginBottom: ".5rem",
+              fontSize: ".9rem",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
             Payment for...
+            <label
+              style={{
+                fontSize: "14px",
+                fontWeight: "bold",
+                cursor: "pointer",
+                margin: "10px",
+                alignItems: "center",
+              }}
+            >
+              <input
+                className="checkbox__input"
+                type="checkbox"
+                checked={allSelected}
+                onChange={handleSelectAll}
+              />
+              Select All
+            </label>
           </div>
+
           <div>
             <div className="grid-pmt-for">
               {members.map((m) => (
@@ -126,6 +165,7 @@ export default function AddNewPayment({ groups = [], setGroups }) {
                       className="checkbox__input"
                       type="checkbox"
                       id={`checkbox-${m.id}`}
+                      checked={selectedMembers.includes(m.name)}
                       onChange={() => onChange(m.name)}
                     />
                     <svg className="checkbox__check" width="24" height="24">
@@ -142,11 +182,34 @@ export default function AddNewPayment({ groups = [], setGroups }) {
             </div>
           </div>
         </div>
-        <div style={{ paddingBottom: "0 1.25rem 1.25rem" }}>
-          <div style={{ marginBottom: "2.5rem" }}>
-            <Button onClick={handleSave}>Save</Button>
+        <div
+          style={{
+            paddingBottom: "0 1.25rem 1.25rem",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              gap: "2rem",
+              marginBottom: "2.5rem",
+              justifyContent: "center", // Center the buttons horizontally
+              alignItems: "center",
+              padding: 0, // Remove extra padding
+              width: "fit-content", // Only as wide as needed
+              marginLeft: "auto",
+              marginRight: "auto",
+            }}
+          >
+            <Button
+              onClick={handleSave}
+              disabled={
+                !payer || !paymentOf || !price || selectedMembers.length === 0
+              }
+            >
+              💾 Save
+            </Button>
             <Link to={`/groupPage/${id}`} className="link-cta">
-              <Button>Back</Button>
+              <Button>← Back</Button>
             </Link>
           </div>
         </div>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import Button from "../components/Button";
+import Button from "../Components/Button";
 import { useNavigate } from "react-router-dom";
 const KEY = "fca_live_qs8ovMhP2am2kETawTSuf4VFn08t1johxAYNmYY6";
 export default function NewGroup({

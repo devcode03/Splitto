@@ -1,7 +1,12 @@
-export default function Button({ onClick, children }) {
+export default function Button({ onClick, disabled, style, children }) {
   return (
-    <button className="cta-button" onClick={onClick}>
-      <div>{children}</div>
+    <button
+      className="cta-button"
+      onClick={onClick}
+      disabled={disabled}
+      style={style}
+    >
+      {children}
     </button>
   );
 }
