@@ -1,70 +1,201 @@
-# Getting Started with Create React App
+<p align="center">
+  <img src="src/assets/cover.webp" alt="Splitto Cover" width="60%" />
+</p>
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# Splitto
 
-## Available Scripts
+**Splitto** is a modern, intuitive web app for splitting group expenses with friends, family, or colleagues. Easily track payments, calculate who owes whom, and settle up with the simplest possible transactions—no registration or app install required!
 
-In the project directory, you can run:
+<p align="center">
+  <a href="https://devcode03.github.io/Splitto/"><img src="https://img.shields.io/badge/Live%20Demo-Online-brightgreen?style=flat-square" alt="Live Demo"></a>
+  <img src="https://img.shields.io/github/license/devcode03/Splitto?style=flat-square" alt="License">
+  <img src="https://img.shields.io/badge/React-19-blue?style=flat-square" alt="React">
+  <img src="https://img.shields.io/badge/Firebase-Cloud-orange?style=flat-square" alt="Firebase">
+</p>
 
-### `npm start`
+---
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Table of Contents
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- [About Splitto](#about-splitto)
+- [Features](#features)
+- [How It Works](#how-it-works)
+- [Project Structure](#project-structure)
+- [Setup & Installation](#setup--installation)
+- [Usage](#usage)
+- [Deployment](#deployment)
+- [Contributing](#contributing)
+- [License](#license)
+- [Contact & Resources](#contact--resources)
 
-### `npm test`
+---
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## About Splitto
 
-### `npm run build`
+**Splitto** helps you and your group keep track of shared expenses and settle up with the minimum number of transactions. Whether you're traveling, dining out, or sharing household costs, Splitto makes bill splitting effortless and transparent.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+- **No registration required**: Use instantly in your browser.
+- **Supports all currencies**: Choose your local or travel currency.
+- **Shareable group links**: Invite friends by sharing a simple URL.
+- **Mobile-friendly**: Works great on any device.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+---
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Features
 
-### `npm run eject`
+- 🚀 **Create Groups**: Start a new group for any event or trip.
+- 👥 **Add Members**: Add friends, family, or colleagues to your group.
+- 💸 **Record Payments**: Log who paid, what for, and how much.
+- 🌍 **Multi-Currency Support**: Select from a wide range of currencies.
+- 🧮 **Automatic Settlement Calculation**: Instantly see who owes whom and how much, with the simplest possible transactions.
+- 🔗 **Share Group Link**: Copy and share your group page with others.
+- 🛡️ **No Login Needed**: Privacy-first, no accounts or passwords.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+---
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## How It Works
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+1. **Create a Group**: Enter a group name, add members, and select your currency.
+2. **Add Payments**: For each expense, specify the payer, amount, description, and who shares the cost.
+3. **View Settlements**: Splitto calculates each member's balance and suggests the minimal set of transactions to settle up.
+4. **Share & Collaborate**: Share your group link so everyone can view or add expenses.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+**Core Algorithm:**  
+Splitto uses a balance calculation and a cash flow minimization algorithm to determine the simplest way to settle debts among group members. This ensures the fewest number of payments are needed for everyone to be even.
 
-## Learn More
+---
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## Project Structure
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+```
+src/
+  ├── App.js                # Main app routing and layout
+  ├── Components/           # Reusable UI components (Header, Footer, GroupList, Button, etc.)
+  ├── Contexts/             # React Context for group state management
+  ├── Pages/                # Main pages (HomePage, Group, Payment, NewGroup)
+  ├── Utils/                # Utility functions (e.g., calculateBalances.js)
+  ├── styles/               # CSS files (index.css, one.css, etc.)
+  ├── assets/               # Images and cover art
+  └── firebase/             # Firebase configuration (for future cloud sync)
+```
 
-### Code Splitting
+**Key Files:**
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+- `App.js`: Sets up routes and main layout.
+- `GroupContext.js`: Provides global state for groups and payments.
+- `calculateBalances.js`: Contains the logic for splitting expenses and minimizing transactions.
+- `NewGroup-v2.js`: Modern group creation flow with currency selection and member management.
+- `Group.js`: Displays group details, payments, and settlement instructions.
 
-### Analyzing the Bundle Size
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+## Setup & Installation
 
-### Making a Progressive Web App
+### Prerequisites
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+- [Node.js](https://nodejs.org/) (v16+ recommended)
+- [npm](https://www.npmjs.com/) (comes with Node.js)
 
-### Advanced Configuration
+### Installation
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+1. **Clone the repository:**
 
-### Deployment
+   ```bash
+   git clone https://github.com/devcode03/Splitto.git
+   cd Splitto/Splitto
+   ```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+2. **Install dependencies:**
 
-### `npm run build` fails to minify
+   ```bash
+   npm install
+   ```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+3. **Start the development server:**
+   ```bash
+   npm start
+   ```
+   The app will open at [http://localhost:3000](http://localhost:3000).
+
+---
+
+## Usage
+
+### 1. Create a Group
+
+- Click **Get Started** on the homepage.
+- Enter a group name, add at least two members, and select your currency.
+- Click **Create a group**.
+
+### 2. Add Payments
+
+- On your group page, click **Add a payment**.
+- Fill in the payer, description, amount, and select who shares the expense.
+- Save the payment.
+
+### 3. View Settlements
+
+- The group page shows all payments and the minimal set of transactions needed to settle up.
+- Share the group link with others so everyone can view or add expenses.
+
+### Example Screenshot
+
+<p align="center">
+  <img src="src/assets/feature1-Y8fuDCPZ.webp" alt="Splitto Screenshot" width="60%" />
+</p>
+
+---
+
+## Deployment
+
+Splitto is ready for deployment on [GitHub Pages](https://pages.github.com/):
+
+1. **Build the app:**
+
+   ```bash
+   npm run build
+   ```
+
+2. **Deploy to GitHub Pages:**
+   ```bash
+   npm run deploy
+   ```
+
+The app will be live at:  
+[https://devcode03.github.io/Splitto/](https://devcode03.github.io/Splitto/)
+
+---
+
+## Contributing
+
+Contributions are welcome! To contribute:
+
+1. Fork the repository.
+2. Create a new branch: `git checkout -b feature/your-feature`
+3. Commit your changes: `git commit -m "Add your feature"`
+4. Push to the branch: `git push origin feature/your-feature`
+5. Open a pull request.
+
+Please follow the [Contributor Covenant](https://www.contributor-covenant.org/) code of conduct.
+
+---
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
+
+---
+
+## Contact & Resources
+
+- **Author:** [devcode03](https://github.com/devcode03)
+- **Live Demo:** [https://devcode03.github.io/Splitto/](https://devcode03.github.io/Splitto/)
+- **Issues:** [GitHub Issues](https://github.com/devcode03/Splitto/issues)
+- **React Documentation:** [https://reactjs.org/](https://reactjs.org/)
+- **Firebase:** [https://firebase.google.com/](https://firebase.google.com/)
+
+---
+
+<p align="center">
+  <b>Split expenses, not friendships! 🚀</b>
+</p>
