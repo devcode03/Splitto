@@ -1,79 +1,138 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Button from "../Components/Button";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { useGroups } from "../Contexts/GroupContext";
-
+import ErrorPopup from "../Components/ErrorPopup";
+import validatePayment from "../Utils/validatePayment";
 export default function AddNewPayment() {
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const paymentID = params.get("paymentID");
+  const isEditMode = !!paymentID;
+
   const { groups, setGroups } = useGroups();
   const navigate = useNavigate();
   const [payer, setPayer] = useState("");
   const [paymentOf, setPaymentOf] = useState("");
   const [price, setPrice] = useState("");
   const [selectedMembers, setSelectedMembers] = useState([]);
-  const [isChecked, setIsChecked] = useState(true);
-  const { id } = useParams();
-  console.log(id);
-  const group = groups.find((g) => g.groupID === id);
-  console.log("group", group);
-  // ...existing code...
+  const [error, setError] = useState("");
 
+  const { id } = useParams();
+  const group = groups.find((g) => g.groupID === id);
   const { members = [], currency, payments = [] } = group;
 
-  const allSelected = selectedMembers.length === members.length;
-  function handleSelectAll() {
-    setSelectedMembers(allSelected ? [] : members.map((m) => m.name));
-  }
   useEffect(() => {
-    if (members.length > 0) {
+    if (isEditMode && payments.length > 0) {
+      const payment = payments.find((p) => p.id === paymentID);
+      if (payment) {
+        setPayer(payment.payer);
+        setPaymentOf(payment.paymentOf);
+        setPrice(payment.price);
+        setSelectedMembers(payment.splitAmong);
+      }
+    } else if (members.length > 0) {
       setPayer(members[0].name);
       setSelectedMembers(members.map((m) => m.name));
     }
-  }, [members]);
-  if (!group) {
-    return <div>Group not found</div>;
-  }
+  }, [isEditMode, paymentID, payments, members]);
 
-  // let isDisabled = false;
-  function onChange(MemName) {
-    setSelectedMembers((prv) =>
-      prv.includes(MemName)
-        ? prv.filter((name) => name !== MemName)
-        : [...prv, MemName]
+  const allSelected = selectedMembers.length === members.length;
+  const handleSelectAll = useCallback(() => {
+    setSelectedMembers(allSelected ? [] : members.map((m) => m.name));
+  }, [allSelected, members]);
+
+  const handleMemberToggle = useCallback((memName) => {
+    setSelectedMembers((prev) =>
+      prev.includes(memName)
+        ? prev.filter((name) => name !== memName)
+        : [...prev, memName]
     );
-    setIsChecked(!isChecked);
-  }
+  }, []);
 
-  function handleSave(e) {
-    e.preventDefault();
-    if (!payer || !paymentOf || !price || selectedMembers.length === 0) {
-      alert("Please fill all the fields and select atleast one friend.");
-      return;
-    }
-    const date = new Date();
-    const formattedDate = date.toLocaleDateString("en-US", {
-      month: "2-digit",
-      day: "2-digit",
-    });
+  const handleSave = useCallback(
+    (e) => {
+      e.preventDefault();
+      const errorMsg = validatePayment({
+        payer,
+        paymentOf,
+        price,
+        selectedMembers,
+      });
+      if (errorMsg) {
+        setError(errorMsg);
+        return;
+      }
+      const date = new Date();
+      const formattedDate = date.toLocaleDateString("en-US", {
+        month: "2-digit",
+        day: "2-digit",
+      });
+      if (isEditMode) {
+        setGroups((prevGroups) =>
+          prevGroups.map((g) =>
+            g.groupID === id
+              ? {
+                  ...g,
+                  payments: g.payments.map((p) =>
+                    p.id === paymentID
+                      ? {
+                          ...p,
+                          payer,
+                          paymentOf,
+                          price: Number(price),
+                          splitAmong: selectedMembers,
+                          date: formattedDate,
+                        }
+                      : p
+                  ),
+                }
+              : g
+          )
+        );
+      } else {
+        const newPayment = {
+          id: crypto.randomUUID(),
+          payer,
+          paymentOf,
+          price: Number(price), // Store as number
+          splitAmong: selectedMembers,
+          date: formattedDate,
+        };
 
-    const newPayment = {
-      id: crypto.randomUUID(),
+        setGroups((prevGroups) =>
+          prevGroups.map((g) =>
+            g.groupID === id
+              ? { ...g, payments: [...g.payments, newPayment] }
+              : g
+          )
+        );
+      }
+      // Only reset fields that make sense
+      setPaymentOf("");
+      setPrice("");
+      setError("");
+      navigate(`/groupPage/${id}`);
+    },
+    [
       payer,
       paymentOf,
-      price: price,
-      splitAmong: selectedMembers,
-      date: formattedDate,
-    };
-    // Update the groups state
-    setGroups((prevGroups) =>
-      prevGroups.map((g) =>
-        g.groupID === id ? { ...g, payments: [...g.payments, newPayment] } : g
-      )
+      price,
+      selectedMembers,
+      setGroups,
+      id,
+      navigate,
+      isEditMode,
+      paymentID,
+    ]
+  );
+  if (!group) {
+    return (
+      <>
+        <ErrorPopup message={"Group not found"} onClose={() => setError("")} />
+        <div role="alert">Group not found</div>
+      </>
     );
-    setPayer("");
-    setPaymentOf("");
-    setPrice("");
-    setSelectedMembers([]);
-    navigate(`/groupPage/${id}`);
   }
 
   return (
@@ -84,7 +143,7 @@ export default function AddNewPayment() {
           <div>
             <select
               id="member-selectbox"
-              defaultValue={payer}
+              value={payer}
               onChange={(e) => setPayer(e.target.value)}
             >
               {members.map((m) => (
@@ -113,7 +172,7 @@ export default function AddNewPayment() {
           <div style={{ marginBottom: ".5rem", fontSize: ".9rem" }}>Price</div>
           <div>
             <div style={{ width: "100%", display: "flex" }}>
-              <div className="rs-btn">{currency.symbol}</div>
+              <div className="rs-btn">{currency?.symbol}</div>
               <input
                 type="number"
                 placeholder="980"
@@ -166,7 +225,7 @@ export default function AddNewPayment() {
                       type="checkbox"
                       id={`checkbox-${m.id}`}
                       checked={selectedMembers.includes(m.name)}
-                      onChange={() => onChange(m.name)}
+                      onChange={() => handleMemberToggle(m.name)}
                     />
                     <svg className="checkbox__check" width="24" height="24">
                       <polyline points="20 6 9 17 4 12"></polyline>

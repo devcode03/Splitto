@@ -19,6 +19,7 @@
 
 - [About Splitto](#about-splitto)
 - [Features](#features)
+- [Screenshots](#screenshots)
 - [How It Works](#how-it-works)
 - [Project Structure](#project-structure)
 - [Setup & Installation](#setup--installation)
@@ -38,6 +39,7 @@
 - **Supports all currencies**: Choose your local or travel currency.
 - **Shareable group links**: Invite friends by sharing a simple URL.
 - **Mobile-friendly**: Works great on any device.
+- **Privacy-first**: No login or account required; your data stays on your device.
 
 ---
 
@@ -50,6 +52,50 @@
 - 🧮 **Automatic Settlement Calculation**: Instantly see who owes whom and how much, with the simplest possible transactions.
 - 🔗 **Share Group Link**: Copy and share your group page with others.
 - 🛡️ **No Login Needed**: Privacy-first, no accounts or passwords.
+- ✏️ **Edit Groups & Payments**: Update group info or payment records anytime.
+- 📱 **Responsive Design**: Optimized for mobile and desktop.
+- ❓ **FAQ, Privacy, Terms, and Contact Pages**: Built-in info and support.
+
+---
+
+## Screenshots
+
+Below are some screenshots to give you a quick overview of Splitto's interface and features:
+
+<p align="center">
+  <img src="src/assets/screenShots/homepage.png" alt="Homepage" width="80%" />
+  <br><em>Homepage: Get started with a clean, modern UI</em>
+</p>
+
+<p align="center">
+  <img src="src/assets/screenShots/new-group.png" alt="Create Group" width="80%" />
+  <br><em>Create a new group: Add members and select currency</em>
+</p>
+
+<p align="center">
+  <img src="src/assets/screenShots/group-list.png" alt="Group List" width="80%" />
+  <br><em>Group List: View and manage all your groups</em>
+</p>
+
+<p align="center">
+  <img src="src/assets/screenShots/group-details.png" alt="Group Details" width="80%" />
+  <br><em>Group Details: See payments, balances, and settlement instructions</em>
+</p>
+
+<p align="center">
+  <img src="src/assets/screenShots/add-payment.png" alt="Add Payment" width="80%" />
+  <br><em>Add a Payment: Record who paid, what for, and how much</em>
+</p>
+
+<p align="center">
+  <img src="src/assets/screenShots/settlement.png" alt="Settlement" width="80%" />
+  <br><em>Settlement: Minimal transactions to settle up</em>
+</p>
+
+<p align="center">
+  <img src="src/assets/screenShots/faq.png" alt="FAQ" width="80%" />
+  <br><em>FAQ: Find answers to common questions</em>
+</p>
 
 ---
 
@@ -75,7 +121,7 @@ src/
   ├── Pages/                # Main pages (HomePage, Group, Payment, NewGroup)
   ├── Utils/                # Utility functions (e.g., calculateBalances.js)
   ├── styles/               # CSS files (index.css, one.css, etc.)
-  ├── assets/               # Images and cover art
+  ├── assets/               # Images and screenshots
   └── firebase/             # Firebase configuration (for future cloud sync)
 ```
 
@@ -137,12 +183,6 @@ src/
 
 - The group page shows all payments and the minimal set of transactions needed to settle up.
 - Share the group link with others so everyone can view or add expenses.
-
-### Example Screenshot
-
-<p align="center">
-  <img src="src/assets/feature1-Y8fuDCPZ.webp" alt="Splitto Screenshot" width="60%" />
-</p>
 
 ---
 

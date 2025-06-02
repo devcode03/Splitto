@@ -9,92 +9,14 @@ import { useState } from "react";
 import { HashRouter as Router, Routes, Route } from "react-router-dom";
 import AddNewPayment from "./Pages/Payment";
 import GroupList from "./Components/GroupList";
-const intialGroups = [
-  {
-    groupID: "73aaefec-b8be-4260-bb97-83a32d91e0fe",
-    name: "test",
-    currency: "$",
-    createDt: "03/25",
-    members: [
-      { id: "LgZk41Tc", name: "q" },
-      { id: "nJBgFer0", name: "sa" },
-    ],
-    payments: [
-      {
-        date: "03/25",
-        id: "28f77dd9-f7b8-4eec-9bfd-6d91f0520c1f",
-        payer: "q",
-        paymentOf: "ass",
-        price: 1000,
-        splitAmong: ["q", "sa"],
-      },
-    ],
-  },
-  {
-    groupID: "73aaefec-b8be-4260-bb97-83a32d91e0as",
-    name: "test2",
-    currency: "$",
-    createDt: "03/25",
-    members: [
-      { id: "LgZk41Tc", name: "q" },
-      { id: "nJBgFer0", name: "sa" },
-    ],
-    payments: [
-      {
-        date: "03/25",
-        id: "28f77dd9-f7b8-4eec-9bfd-6d91f0520c1f",
-        payer: "q",
-        paymentOf: "ass",
-        price: 1000,
-        splitAmong: ["q", "sa"],
-      },
-    ],
-  },
-  {
-    groupID: "73aaefec-b8be-4260-bb97-83a32d91e011",
-    name: "test3",
-    currency: "$",
-    createDt: "03/25",
-    members: [
-      { id: "LgZk41Tc", name: "q" },
-      { id: "nJBgFer0", name: "sa" },
-    ],
-    payments: [
-      {
-        date: "03/25",
-        id: "28f77dd9-f7b8-4eec-9bfd-6d91f0520c1f",
-        payer: "q",
-        paymentOf: "ass",
-        price: 1000,
-        splitAmong: ["q", "sa"],
-      },
-    ],
-  },
-  {
-    groupID: "73aaefec-b8be-4260-bb97-83a32d91eassas",
-    name: "test4",
-    currency: "$",
-    createDt: "03/25",
-    members: [
-      { id: "LgZk41Tc", name: "q" },
-      { id: "nJBgFer0", name: "sa" },
-    ],
-    payments: [
-      {
-        date: "03/25",
-        id: "28f77dd9-f7b8-4eec-9bfd-6d91f0520c1f",
-        payer: "q",
-        paymentOf: "ass",
-        price: 1000,
-        splitAmong: ["q", "sa"],
-      },
-    ],
-  },
-];
+import EditGroup from "./Pages/EditGroup";
+import FAQ from "./Components/FAQ";
+import Contact from "./Components/Contact";
+import PrivacyPolicy from "./Components/PrivacyPolicy";
+import Terms from "./Components/TermsAndConditions";
+import About from "./Components/AboutUs";
 
 export default function App() {
-  // const [groups, setGroups] = useState(intialGroups);
-
   return (
     <Router>
       <div className=" mx-auto App">
@@ -111,7 +33,14 @@ export default function App() {
             />
             <Route path="newGroup" element={<NewGroup />} />
             <Route path="groupPage/:id" element={<Group />} />
+            <Route path="newGroup/:id/edit" element={<EditGroup />} />
             <Route path="addPayment/:id" element={<AddNewPayment />} />
+            <Route path="addPayment/:id/edit" element={<AddNewPayment />} />
+            <Route path="faq" element={<FAQ />} />
+            <Route path="contact" element={<Contact />} />
+            <Route path="privacy" element={<PrivacyPolicy />} />
+            <Route path="terms" element={<Terms />} />
+            <Route path="about" element={<About />} />
           </Routes>
         </div>
         <Footer />

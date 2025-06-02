@@ -9,8 +9,13 @@ function useGroups() {
 
 function GroupProvider({ children }) {
   const [groups, setGroups] = useState([]);
+  function updateGroup(groupID, updateFields) {
+    setGroups((prev) =>
+      prev.map((g) => (g.groupID === groupID ? { ...g, ...updateFields } : g))
+    );
+  }
   return (
-    <GroupsContext.Provider value={{ groups, setGroups }}>
+    <GroupsContext.Provider value={{ groups, setGroups, updateGroup }}>
       {children}
     </GroupsContext.Provider>
   );

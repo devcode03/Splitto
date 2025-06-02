@@ -5,11 +5,13 @@ import {
   calculateBalances,
   minimizeCashFlow,
 } from "../Utils/calculateBalances";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+import ErrorPopup from "../Components/ErrorPopup";
 
 export default function Group() {
   const { groups } = useGroups();
   const { id } = useParams();
+  const [error, setError] = useState("");
   const group = groups.find((g) => g.groupID === id);
 
   const { payments = [], members = [], currency, name } = group;
@@ -22,13 +24,19 @@ export default function Group() {
     const transactions = minimizeCashFlow(balances);
     return { balances, transactions };
   }, [payments, members, hasPayments]);
-
+  // Show error if group is not found
   if (!group) {
-    return <div>Loading...</div>;
+    return (
+      <>
+        <ErrorPopup message={"Group not found!"} onClose={() => setError("")} />
+        <div>Loading...</div>
+      </>
+    );
   }
   return (
     <>
-      <GroupHeader groupName={name} members={members} />
+      <ErrorPopup message={error} onClose={() => setError("")} />
+      <GroupHeader group={group} />
       <div style={{ padding: "1.25rem" }} className="bg-a0 ">
         <div style={{ marginTop: "1.25rem", marginBottom: "1.25rem" }}>
           <div style={{ display: "flex", justifyContent: "center" }}>
@@ -41,7 +49,7 @@ export default function Group() {
             </Link>
           </div>
           {!hasPayments && <NewRegisterMsg />}
-          <PaymentDetails payments={payments} currency={currency} />
+          <PaymentDetails payments={payments} currency={currency} id={id} />
         </div>
         {hasPayments && (
           <TransactionsDetls transactions={transactions} currency={currency} />
@@ -50,32 +58,32 @@ export default function Group() {
     </>
   );
 }
-function GroupHeader({ groupName, members }) {
-  // Support both array and object for members
+function GroupHeader({ group }) {
   let memberNames = [];
-  if (Array.isArray(members)) {
-    memberNames = members.map((m) => m.name || m.Name);
-  } else if (typeof members === "object" && members !== null) {
-    memberNames = Object.values(members).map((m) => m.name || m.Name);
+  if (Array.isArray(group.members)) {
+    memberNames = group.members.map((m) => m.name || m.Name);
+  } else if (typeof members === "object" && group.members !== null) {
+    memberNames = Object.values(group.members).map((m) => m.name || m.Name);
   }
   return (
     <div style={{ padding: "1.25rem" }}>
       <div className="group-name">
-        <h1>{groupName}</h1>
-        <button className="edit-main-btn">
+        <h1>{group.name}</h1>
+        <Link className="edit-main-btn" to={`/newGroup/${group.groupID}/edit`}>
           <a>
             <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
+              stroke="currentColor"
               fill="currentColor"
-              aria-hidden="true"
-              className="mx-auto"
-              width="18"
+              strokeWidth="0"
+              viewBox="0 0 24 24"
+              height="1.5em"
+              width="1.5em"
+              xmlns="http://www.w3.org/2000/svg"
             >
-              <path d="M21.731 2.269a2.625 2.625 0 00-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 000-3.712zM19.513 8.199l-3.712-3.712-12.15 12.15a5.25 5.25 0 00-1.32 2.214l-.8 2.685a.75.75 0 00.933.933l2.685-.8a5.25 5.25 0 002.214-1.32L19.513 8.2z"></path>
+              <path d="M3 17.25V21h3.75l11.06-11.06-3.75-3.75L3 17.25zM20.71 7.04a1.003 1.003 0 0 0 0-1.42l-2.34-2.34a1.003 1.003 0 0 0-1.42 0l-1.83 1.83 3.75 3.75 1.84-1.82z"></path>
             </svg>
           </a>
-        </button>
+        </Link>
       </div>
       <span>{memberNames.join(" • ")}</span>
     </div>
@@ -118,13 +126,13 @@ function NewRegisterMsg() {
   );
 }
 
-function PaymentDetails({ payments, currency }) {
+function PaymentDetails({ payments, currency, id }) {
   if (!payments.length) return null;
 
   return (
     <div style={{ marginTop: "1.25rem" }}>
-      {payments.map((p, id) => (
-        <div key={id} className="payemnt-tile">
+      {payments.map((p) => (
+        <div key={p.id} className="payemnt-tile">
           <div style={{ gridColumn: "span 6 / span 6", lineHeight: "1.25rem" }}>
             <span style={{ fontSize: "1rem", display: "block" }}>
               {p.paymentOf}
@@ -151,19 +159,24 @@ function PaymentDetails({ payments, currency }) {
             {p.price}
           </div>
           <div style={{ gridColumn: "span 2 / span 2" }}>
-            <a>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-                aria-hidden="true"
-                className="mx-auto"
-                width="20"
-                display="block"
-              >
-                <path d="M21.731 2.269a2.625 2.625 0 00-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 000-3.712zM19.513 8.199l-3.712-3.712-12.15 12.15a5.25 5.25 0 00-1.32 2.214l-.8 2.685a.75.75 0 00.933.933l2.685-.8a5.25 5.25 0 002.214-1.32L19.513 8.2z"></path>
-              </svg>
-            </a>
+            <Link
+              to={`/addPayment/${id}/edit?paymentID=${p.id}`}
+              style={{ textDecoration: "none", color: "var(--clr-light-a0)" }}
+            >
+              <a>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  aria-hidden="true"
+                  className="mx-auto"
+                  width="20"
+                  display="block"
+                >
+                  <path d="M21.731 2.269a2.625 2.625 0 00-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 000-3.712zM19.513 8.199l-3.712-3.712-12.15 12.15a5.25 5.25 0 00-1.32 2.214l-.8 2.685a.75.75 0 00.933.933l2.685-.8a5.25 5.25 0 002.214-1.32L19.513 8.2z"></path>
+                </svg>
+              </a>
+            </Link>
           </div>
         </div>
       ))}

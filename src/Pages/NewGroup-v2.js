@@ -1,15 +1,17 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Button from "../Components/Button";
 import { Link } from "react-router-dom";
 import { nanoid } from "nanoid";
 import { useGroups } from "../Contexts/GroupContext";
-
-const KEY = "fca_live_qs8ovMhP2am2kETawTSuf4VFn08t1johxAYNmYY6";
+import { useCurrencyList } from "../Contexts/CurrencyContext";
+import ErrorPopup from "../Components/ErrorPopup";
 
 export default function NewGroup() {
   const { setGroups } = useGroups();
   const [groupName, setGroupName] = useState("");
   const [members, setMembers] = useState([]);
+  const [error, setError] = useState("");
+
   const [currency, setCurrency] = useState({
     code: "USD",
     symbol: "$",
@@ -19,37 +21,7 @@ export default function NewGroup() {
   const [name, setName] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-  const [currencyList, setCurrencyList] = useState([]);
-
-  useEffect(function () {
-    async function fetchCurrList() {
-      try {
-        const res = await fetch(
-          `https://api.freecurrencyapi.com/v1/currencies?apikey=${KEY}&currencies=`
-        );
-        if (!res.ok)
-          throw new Error("Something went wrong with fetching Currencies");
-
-        const data = await res.json();
-        if (data.Response === "False") throw new Error("Currencies not found");
-        // Convert object to array of {code, symbol, name}
-        const currencies = Object.entries(data.data).map(([code, obj]) => ({
-          code,
-          symbol: obj.symbol_native || obj.symbol || "$",
-          name: obj.name,
-        }));
-        setCurrencyList(currencies);
-        // Set default currency if not set
-        if (!currency.code && currencies.length > 0) {
-          setCurrency(currencies[0]);
-        }
-      } catch (err) {
-        console.error(err.message);
-      }
-    }
-    fetchCurrList();
-    // eslint-disable-next-line
-  }, []);
+  const currencyList = useCurrencyList();
 
   //handle currency selection
   function handleCurrency(e) {
@@ -59,17 +31,23 @@ export default function NewGroup() {
   }
 
   // Add member to the group
-  function handleMembers(e) {
+  function handleAddMember(e) {
     e.preventDefault();
-    if (!name.trim()) return alert("Member name cannot be empty!");
-    if (members.some((mem) => mem.name.toLowerCase() === name.toLowerCase()))
-      return alert("This member is already added!");
-
-    const newMember = {
-      name: name.trim(),
-      id: nanoid(8),
-    };
-    setMembers((prev) => [...prev, newMember]);
+    setError("");
+    const trimmedName = name.trim();
+    if (!trimmedName) {
+      setError("Member name cannot be empty!");
+      return;
+    }
+    if (
+      members.some(
+        (mem) => mem.name.toLowerCase() === trimmedName.toLowerCase()
+      )
+    ) {
+      setError("This member is already added!");
+      return;
+    }
+    setMembers((prev) => [...prev, { name: trimmedName, id: nanoid(8) }]);
     setName("");
   }
 
@@ -81,32 +59,44 @@ export default function NewGroup() {
   //handle group creation
   function handleSubmit(e) {
     e.preventDefault();
-
-    if (!groupName.trim()) return alert("Please enter the Group Name");
-    if (members.length < 2) return alert("Add two or more members/friends");
+    setError("");
+    if (!groupName.trim()) {
+      setError("Please enter the Group Name");
+      return;
+    }
+    if (members.length < 2) {
+      setError("Add two or more members/friends");
+      return;
+    }
     const groupID = crypto.randomUUID();
-    const newGroup = {
-      groupID,
-      name: groupName.trim(),
-      currency,
-      members,
-      payments: [],
-      createDt: new Date().toLocaleDateString("en-US", {
-        month: "2-digit",
-        day: "2-digit",
-        year: "numeric",
-      }),
-    };
-    setGroups((prev) => [...prev, newGroup]);
+    setGroups((prev) => [
+      ...prev,
+      {
+        groupID,
+        name: groupName.trim(),
+        currency,
+        members,
+        payments: [],
+        createDt: new Date().toLocaleDateString("en-US", {
+          month: "2-digit",
+          day: "2-digit",
+          year: "numeric",
+        }),
+      },
+    ]);
     setGroupId(groupID);
     setIsSubmitted(true);
   }
-
+  if (isSubmitted) {
+    return <Confirmation groupID={groupId} groupName={groupName} />;
+  }
   return (
     <div
       className={!isSubmitted ? "bg-a0" : "bg-d0"}
       style={{ padding: "2rem" }}
     >
+      <ErrorPopup message={error} onClose={() => setError("")} />
+
       {isSubmitted ? (
         <Confirmation groupID={groupId} groupName={groupName} />
       ) : (
@@ -126,15 +116,26 @@ export default function NewGroup() {
             </li>
             <li>
               <div style={{ marginBottom: "1rem" }}>
-                <div className="label">Member Name</div>
+                <label htmlFor="member-name" className="label">
+                  Member Name
+                </label>
                 <div style={{ display: "flex", justifyContent: "center" }}>
                   <input
                     type="text"
                     placeholder="Rahul"
                     value={name}
+                    aria-required="true"
                     onChange={(e) => setName(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") handleAddMember(e);
+                    }}
                   />
-                  <button className="btn-add" onClick={handleMembers}>
+                  <button
+                    className="btn-add"
+                    type="button"
+                    aria-label="Add member"
+                    onClick={handleAddMember}
+                  >
                     Add
                   </button>
                 </div>
@@ -142,27 +143,38 @@ export default function NewGroup() {
 
               {members.map((mem) => (
                 <div className="frnd-added" key={mem.id}>
-                  <span style={{ marginRight: "0.5rem" }} key={mem.id}>
-                    {mem.name}
-                  </span>
-                  <svg
+                  <span style={{ marginRight: "0.5rem" }}>{mem.name}</span>
+                  <button
+                    type="button"
+                    aria-label={`Remove ${mem.name}`}
                     onClick={() => handleDeleteMember(mem.id)}
-                    stroke="currentColor"
-                    fill="currentColor"
-                    strokeWidth="0"
-                    viewBox="0 0 24 24"
-                    height="1em"
-                    width="1em"
-                    xmlns="http://www.w3.org/2000/svg"
+                    style={{
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                      color: "inherit",
+                    }}
                   >
-                    <path fill="none" d="M0 0h24v24H0z"></path>
-                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path>
-                  </svg>
+                    <svg
+                      stroke="currentColor"
+                      fill="currentColor"
+                      strokeWidth="0"
+                      viewBox="0 0 24 24"
+                      height="1em"
+                      width="1em"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path fill="none" d="M0 0h24v24H0z"></path>
+                      <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path>
+                    </svg>
+                  </button>
                 </div>
               ))}
             </li>
             <li>
-              <div className="label">Currency of Your Country</div>
+              <label htmlFor="base-currency-selectbox" className="label">
+                Currency of Your Country
+              </label>
               <div>
                 <select
                   name="currencies"
@@ -178,7 +190,6 @@ export default function NewGroup() {
                 </select>
               </div>
             </li>
-            <li></li>
           </ul>
           <div style={{ display: "flex", justifyContent: "center" }}>
             <Button>Create a group</Button>
@@ -297,7 +308,7 @@ function Confirmation({ groupID, groupName }) {
         </div>
       </div>
       <div style={{ display: "flex", justifyContent: "center" }}>
-        <Link to={`/groupPage/${groupID}?${groupName}`} className="link-cta">
+        <Link to={`/groupPage/${groupID}`} className="link-cta">
           <Button>Go to your Group Page!</Button>
         </Link>
       </div>
