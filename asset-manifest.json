@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/Splitto/static/css/main.1ed38b27.css",
-    "main.js": "/Splitto/static/js/main.daa5b326.js",
+    "main.js": "/Splitto/static/js/main.fc68c603.js",
     "static/js/455.68887f77.chunk.js": "/Splitto/static/js/455.68887f77.chunk.js",
     "static/js/63.3eac970a.chunk.js": "/Splitto/static/js/63.3eac970a.chunk.js",
     "static/js/541.2d66ad77.chunk.js": "/Splitto/static/js/541.2d66ad77.chunk.js",
@@ -34,7 +34,7 @@
     "static/media/undraw_young-man-avatar_wgbd.svg": "/Splitto/static/media/undraw_young-man-avatar_wgbd.0851c653a0cd81dd4ce3ae50906b7b84.svg",
     "index.html": "/Splitto/index.html",
     "main.1ed38b27.css.map": "/Splitto/static/css/main.1ed38b27.css.map",
-    "main.daa5b326.js.map": "/Splitto/static/js/main.daa5b326.js.map",
+    "main.fc68c603.js.map": "/Splitto/static/js/main.fc68c603.js.map",
     "455.68887f77.chunk.js.map": "/Splitto/static/js/455.68887f77.chunk.js.map",
     "63.3eac970a.chunk.js.map": "/Splitto/static/js/63.3eac970a.chunk.js.map",
     "541.2d66ad77.chunk.js.map": "/Splitto/static/js/541.2d66ad77.chunk.js.map",
@@ -58,6 +58,6 @@
   },
   "entrypoints": [
     "static/css/main.1ed38b27.css",
-    "static/js/main.daa5b326.js"
+    "static/js/main.fc68c603.js"
   ]
 }
