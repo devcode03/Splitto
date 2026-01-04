@@ -14,19 +14,28 @@ function GroupProvider({ children }) {
   const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
   const [authReady, setAuthReady] = useState(false);
 
-  // Wait for auth to initialize
+  // Wait for auth to initialize and track current user
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setCurrentUser(user);
       setAuthReady(true);
     });
     return unsubscribe;
   }, []);
 
-  // Subscribe to real-time updates from Firebase AFTER auth is ready
+  // Subscribe to real-time updates from Firebase when user changes
   useEffect(() => {
     if (!authReady) {
+      return;
+    }
+
+    // Reset groups when user changes (logout/login)
+    if (!currentUser) {
+      setGroups([]);
+      setLoading(false);
       return;
     }
 
@@ -43,11 +52,11 @@ function GroupProvider({ children }) {
       setLoading(false);
     });
 
-    // Cleanup subscription on unmount
+    // Cleanup subscription on unmount or when user changes
     return () => {
       if (unsubscribe) unsubscribe();
     };
-  }, [authReady]);
+  }, [authReady, currentUser]);
 
   const updateGroup = useCallback(async (groupID, updateFields) => {
     // Store previous state for rollback
