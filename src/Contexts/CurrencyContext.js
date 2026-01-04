@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState, useMemo } from "react";
 
 const CurrencyContext = createContext();
 
@@ -6,6 +6,7 @@ const KEY = "fca_live_qs8ovMhP2am2kETawTSuf4VFn08t1johxAYNmYY6";
 
 export function CurrencyProvider({ children }) {
   const [currencyList, setCurrencyList] = useState([]);
+
   useEffect(() => {
     async function fetchCurrencies() {
       try {
@@ -21,13 +22,17 @@ export function CurrencyProvider({ children }) {
         }));
         setCurrencyList(currencies);
       } catch (err) {
-        // handle error
+        console.error("Failed to fetch currencies:", err);
       }
     }
     fetchCurrencies();
   }, []);
+
+  // Memoize the currency list to prevent unnecessary re-renders
+  const memoizedCurrencyList = useMemo(() => currencyList, [currencyList]);
+
   return (
-    <CurrencyContext.Provider value={currencyList}>
+    <CurrencyContext.Provider value={memoizedCurrencyList}>
       {children}
     </CurrencyContext.Provider>
   );

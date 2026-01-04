@@ -1,28 +1,40 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, memo } from "react";
 import Button from "../Components/Button";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { useGroups } from "../Contexts/GroupContext";
 import ErrorPopup from "../Components/ErrorPopup";
 import validatePayment from "../Utils/validatePayment";
+import Loading from "../Components/Loading";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faFloppyDisk } from '@fortawesome/free-solid-svg-icons';
+
 export default function AddNewPayment() {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const paymentID = params.get("paymentID");
   const isEditMode = !!paymentID;
 
-  const { groups, setGroups } = useGroups();
+  const { groups, loading, addPayment, updatePayment } = useGroups();
   const navigate = useNavigate();
   const [payer, setPayer] = useState("");
   const [paymentOf, setPaymentOf] = useState("");
   const [price, setPrice] = useState("");
   const [selectedMembers, setSelectedMembers] = useState([]);
   const [error, setError] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
 
   const { id } = useParams();
   const group = groups.find((g) => g.groupID === id);
-  const { members = [], currency, payments = [] } = group;
+  const { members = [], currency } = group;
+
+  // Initialize form when group loads or changes - only run once when component mounts
+  const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
+    if (!group || initialized) return;
+
+    const { members = [], payments = [] } = group;
+
     if (isEditMode && payments.length > 0) {
       const payment = payments.find((p) => p.id === paymentID);
       if (payment) {
@@ -30,12 +42,16 @@ export default function AddNewPayment() {
         setPaymentOf(payment.paymentOf);
         setPrice(payment.price);
         setSelectedMembers(payment.splitAmong);
+        setInitialized(true);
       }
-    } else if (members.length > 0) {
+    } else if (members.length > 0 && !payer) {
       setPayer(members[0].name);
       setSelectedMembers(members.map((m) => m.name));
+      setInitialized(true);
     }
-  }, [isEditMode, paymentID, payments, members]);
+  }, [group, isEditMode, paymentID, initialized, payer]); // Fixed dependencies
+
+
 
   const allSelected = selectedMembers.length === members.length;
   const handleSelectAll = useCallback(() => {
@@ -51,7 +67,7 @@ export default function AddNewPayment() {
   }, []);
 
   const handleSave = useCallback(
-    (e) => {
+    async (e) => {
       e.preventDefault();
       const errorMsg = validatePayment({
         payer,
@@ -63,80 +79,88 @@ export default function AddNewPayment() {
         setError(errorMsg);
         return;
       }
+
+      setIsSaving(true);
+      setError(""); // Clear any previous errors
+
       const date = new Date();
       const formattedDate = date.toLocaleDateString("en-US", {
         month: "2-digit",
         day: "2-digit",
       });
-      if (isEditMode) {
-        setGroups((prevGroups) =>
-          prevGroups.map((g) =>
-            g.groupID === id
-              ? {
-                  ...g,
-                  payments: g.payments.map((p) =>
-                    p.id === paymentID
-                      ? {
-                          ...p,
-                          payer,
-                          paymentOf,
-                          price: Number(price),
-                          splitAmong: selectedMembers,
-                          date: formattedDate,
-                        }
-                      : p
-                  ),
-                }
-              : g
-          )
-        );
-      } else {
-        const newPayment = {
-          id: crypto.randomUUID(),
-          payer,
-          paymentOf,
-          price: Number(price), // Store as number
-          splitAmong: selectedMembers,
-          date: formattedDate,
-        };
 
-        setGroups((prevGroups) =>
-          prevGroups.map((g) =>
-            g.groupID === id
-              ? { ...g, payments: [...g.payments, newPayment] }
-              : g
-          )
-        );
+      let result;
+      try {
+        if (isEditMode) {
+          // Update existing payment via context
+          result = await updatePayment(id, paymentID, {
+            payer,
+            paymentOf,
+            price: Number(price),
+            splitAmong: selectedMembers,
+            date: formattedDate,
+          });
+        } else {
+          // Add new payment via context
+          const newPayment = {
+            id: crypto.randomUUID(),
+            payer,
+            paymentOf,
+            price: Number(price),
+            splitAmong: selectedMembers,
+            date: formattedDate,
+          };
+          result = await addPayment(id, newPayment);
+        }
+
+        setIsSaving(false);
+
+        if (result.success) {
+          // Reset fields and navigate
+          setPaymentOf("");
+          setPrice("");
+          setError("");
+          navigate(`/groupPage/${id}`);
+        } else {
+          setError(result.error || "Failed to save payment. Please try again.");
+        }
+      } catch (error) {
+        setIsSaving(false);
+        setError("An unexpected error occurred. Please try again.");
+        console.error("Payment save error:", error);
       }
-      // Only reset fields that make sense
-      setPaymentOf("");
-      setPrice("");
-      setError("");
-      navigate(`/groupPage/${id}`);
     },
     [
       payer,
       paymentOf,
       price,
       selectedMembers,
-      setGroups,
       id,
       navigate,
       isEditMode,
       paymentID,
     ]
   );
+
+  // Show loading state
+  if (loading) {
+    return <Loading fullScreen message="Loading payment form..." />;
+  }
+
+  // Show error if group is not found
   if (!group) {
     return (
       <>
         <ErrorPopup message={"Group not found"} onClose={() => setError("")} />
-        <div role="alert">Group not found</div>
+        <div style={{ padding: "2rem", textAlign: "center" }}>Group not found</div>
       </>
     );
   }
 
+
   return (
     <div className="bg-a0">
+      <ErrorPopup message={error} onClose={() => setError("")} />
       <div className="form-card">
         <div style={{ marginBottom: "1.25rem" }}>
           <div style={{ marginBottom: ".5rem", fontSize: ".9rem" }}>Payer</div>
@@ -262,13 +286,13 @@ export default function AddNewPayment() {
             <Button
               onClick={handleSave}
               disabled={
-                !payer || !paymentOf || !price || selectedMembers.length === 0
+                isSaving || !payer || !paymentOf || !price || selectedMembers.length === 0
               }
             >
-              💾 Save
+              {isSaving ? <><FontAwesomeIcon icon={faFloppyDisk} /> Saving...</> : <><FontAwesomeIcon icon={faFloppyDisk} /> Save</>}
             </Button>
             <Link to={`/groupPage/${id}`} className="link-cta">
-              <Button>← Back</Button>
+              <Button disabled={isSaving}>← Back</Button>
             </Link>
           </div>
         </div>

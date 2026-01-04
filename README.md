@@ -35,26 +35,29 @@
 
 **Splitto** helps you and your group keep track of shared expenses and settle up with the minimum number of transactions. Whether you're traveling, dining out, or sharing household costs, Splitto makes bill splitting effortless and transparent.
 
-- **No registration required**: Use instantly in your browser.
-- **Supports all currencies**: Choose your local or travel currency.
-- **Shareable group links**: Invite friends by sharing a simple URL.
-- **Mobile-friendly**: Works great on any device.
-- **Privacy-first**: No login or account required; your data stays on your device.
+- **Secure authentication**: Sign up with email/password or Google
+- **Cloud sync with Firebase**: Your data syncs across all devices in real-time
+- **Supports all currencies**: Choose your local or travel currency
+- **Real-time collaboration**: Changes appear instantly for all group members
+- **Mobile-friendly**: Works great on any device
+- **Private & secure**: Each user sees only their own groups
 
 ---
 
 ## Features
 
-- 🚀 **Create Groups**: Start a new group for any event or trip.
-- 👥 **Add Members**: Add friends, family, or colleagues to your group.
-- 💸 **Record Payments**: Log who paid, what for, and how much.
-- 🌍 **Multi-Currency Support**: Select from a wide range of currencies.
-- 🧮 **Automatic Settlement Calculation**: Instantly see who owes whom and how much, with the simplest possible transactions.
-- 🔗 **Share Group Link**: Copy and share your group page with others.
-- 🛡️ **No Login Needed**: Privacy-first, no accounts or passwords.
-- ✏️ **Edit Groups & Payments**: Update group info or payment records anytime.
-- 📱 **Responsive Design**: Optimized for mobile and desktop.
-- ❓ **FAQ, Privacy, Terms, and Contact Pages**: Built-in info and support.
+- 🔐 **Authentication**: Secure login with email/password or Google
+- 🚀 **Create Groups**: Start a new group for any event or trip
+- 👥 **Add Members**: Add friends, family, or colleagues to your group
+- 💸 **Record Payments**: Log who paid, what for, and how much
+- 🌍 **Multi-Currency Support**: Select from a wide range of currencies
+- 🧮 **Automatic Settlement Calculation**: Instantly see who owes whom and how much, with the simplest possible transactions
+- ☁️ **Cloud Sync**: Real-time synchronization across all devices
+- 🔗 **Share Group Link**: Copy and share your group page with others
+- 🛡️ **Privacy & Security**: User data isolation with Firebase security rules
+- ✏️ **Edit Groups & Payments**: Update group info or payment records anytime
+- 📱 **Responsive Design**: Optimized for mobile and desktop
+- ❓ **FAQ, Privacy, Terms, and Contact Pages**: Built-in info and support
 
 ---
 
@@ -115,23 +118,50 @@ Splitto uses a balance calculation and a cash flow minimization algorithm to det
 
 ```
 src/
-  ├── App.js                # Main app routing and layout
-  ├── Components/           # Reusable UI components (Header, Footer, GroupList, Button, etc.)
-  ├── Contexts/             # React Context for group state management
-  ├── Pages/                # Main pages (HomePage, Group, Payment, NewGroup)
-  ├── Utils/                # Utility functions (e.g., calculateBalances.js)
-  ├── styles/               # CSS files (index.css, one.css, etc.)
-  ├── assets/               # Images and screenshots
-  └── firebase/             # Firebase configuration (for future cloud sync)
+  ├── App.js                # Main app routing with authentication
+  ├── Components/           # Reusable UI components (Header, Footer, GroupList, etc.)
+  │   ├── PrivateRoute.js   # Protected route wrapper
+  │   └── ...
+  ├── Contexts/             # React Context providers
+  │   ├── AuthContext.js    # Authentication state management
+  │   ├── GroupContext.js   # Groups state with Firebase real-time sync
+  │   └── CurrencyContext.js
+  ├── Pages/                # Main pages
+  │   ├── Login.js          # Login page
+  │   ├── Signup.js         # Signup page
+  │   ├── ForgotPassword.js # Password reset
+  │   ├── HomePage.js       # Landing page
+  │   ├── NewGroup-v2.js    # Group creation
+  │   ├── Group.js          # Group details
+  │   ├── EditGroup.js      # Edit group
+  │   └── Payment.js        # Add/edit payment
+  ├── services/
+  │   └── firebase/
+  │       ├── authService.js      # Authentication functions
+  │       ├── groupService.js     # Group CRUD operations
+  │       ├── paymentService.js   # Payment operations
+  │       └── settlementService.js # Settlement operations
+  ├── hooks/
+  │   ├── useFirebaseGroups.js    # Groups hook with real-time updates
+  │   └── useFirebasePayments.js  # Payments hook
+  ├── config/
+  │   └── firebase.js       # Firebase configuration
+  ├── Utils/                # Utility functions (calculateBalances.js)
+  ├── styles/               # CSS files (Auth.css, index.css, one.css)
+  └── assets/               # Images and screenshots
 ```
 
 **Key Files:**
 
-- `App.js`: Sets up routes and main layout.
-- `GroupContext.js`: Provides global state for groups and payments.
-- `calculateBalances.js`: Contains the logic for splitting expenses and minimizing transactions.
-- `NewGroup-v2.js`: Modern group creation flow with currency selection and member management.
-- `Group.js`: Displays group details, payments, and settlement instructions.
+- `App.js`: Sets up routes with authentication and main layout
+- `AuthContext.js`: Manages authentication state globally
+- `GroupContext.js`: Provides global state for groups with Firebase real-time sync
+- `firebase.js`: Firebase configuration (Auth, Firestore, Analytics)
+- `authService.js`: Email/password and Google authentication
+- `groupService.js`: Group CRUD operations with Firestore
+- `calculateBalances.js`: Logic for splitting expenses and minimizing transactions
+- `NewGroup-v2.js`: Modern group creation flow with currency selection
+- `Group.js`: Displays group details, payments, and settlement instructions
 
 ---
 
@@ -139,8 +169,9 @@ src/
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/) (v16+ recommended)
+- [Node.js](https://nodejs.org/) (v14+ recommended)
 - [npm](https://www.npmjs.com/) (comes with Node.js)
+- Firebase account ([Get started free](https://firebase.google.com/))
 
 ### Installation
 
@@ -157,32 +188,54 @@ src/
    npm install
    ```
 
-3. **Start the development server:**
+3. **Firebase Setup:**
+
+   The Firebase configuration is already set up. You need to:
+
+   - **Enable Firestore Database** in [Firebase Console](https://console.firebase.google.com/)
+   - **Enable Authentication** (Email/Password + Google) in Firebase Console
+   - **Deploy security rules** (optional but recommended):
+     ```bash
+     firebase deploy --only firestore:rules
+     ```
+
+   For detailed setup instructions, see [docs/SETUP_GUIDE.md](docs/SETUP_GUIDE.md)
+
+4. **Start the development server:**
    ```bash
    npm start
    ```
    The app will open at [http://localhost:3000](http://localhost:3000).
 
+For complete setup instructions, see the [Setup Guide](docs/SETUP_GUIDE.md).
+
 ---
 
 ## Usage
 
-### 1. Create a Group
+### 1. Sign Up / Login
 
-- Click **Get Started** on the homepage.
-- Enter a group name, add at least two members, and select your currency.
-- Click **Create a group**.
+- Visit the app and click **Sign Up** to create an account
+- Use email/password or sign in with Google
+- Your groups will sync across all your devices
 
-### 2. Add Payments
+### 2. Create a Group
 
-- On your group page, click **Add a payment**.
-- Fill in the payer, description, amount, and select who shares the expense.
-- Save the payment.
+- Click **Create New Group** on the homepage
+- Enter a group name, add at least two members, and select your currency
+- Click **Create a group**
 
-### 3. View Settlements
+### 3. Add Payments
 
-- The group page shows all payments and the minimal set of transactions needed to settle up.
-- Share the group link with others so everyone can view or add expenses.
+- On your group page, click **Add a payment**
+- Fill in the payer, description, amount, and select who shares the expense
+- Save the payment - it syncs in real-time!
+
+### 4. View Settlements
+
+- The group page shows all payments and the minimal set of transactions needed to settle up
+- Share the group link with others so everyone can view or add expenses
+- All changes sync instantly across all devices
 
 ---
 
@@ -203,6 +256,16 @@ Splitto is ready for deployment on [GitHub Pages](https://pages.github.com/):
 
 The app will be live at:  
 [https://devcode03.github.io/Splitto/](https://devcode03.github.io/Splitto/)
+
+**Note:** Make sure Firebase configuration is set up for production deployment.
+
+---
+
+## Documentation
+
+- **[Setup Guide](docs/SETUP_GUIDE.md)** - Complete setup and configuration instructions
+- **[Architecture](docs/ARCHITECTURE.md)** - System architecture and data flow diagrams
+- **[Authentication Guide](docs/AUTHENTICATION_GUIDE.md)** - Authentication system details
 
 ---
 

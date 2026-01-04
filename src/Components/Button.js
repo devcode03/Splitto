@@ -1,4 +1,6 @@
-export default function Button({ onClick, disabled, style, children }) {
+import { memo } from "react";
+
+const Button = memo(function Button({ onClick, disabled, style, children }) {
   return (
     <button
       className="cta-button"
@@ -9,4 +11,6 @@ export default function Button({ onClick, disabled, style, children }) {
       {children}
     </button>
   );
-}
+});
+
+export default Button;

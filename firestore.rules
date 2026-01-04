@@ -1,0 +1,85 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Helper function to check if user is the owner
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Users collection - Users can only access their own data
+    match /users/{userId} {
+      // Allow users to read their own profile
+      allow read: if isOwner(userId);
+      
+      // Allow users to create their own profile during signup
+      allow create: if isAuthenticated() && request.auth.uid == userId;
+      
+      // Allow users to update their own profile
+      allow update: if isOwner(userId);
+      
+      // Prevent deletion of user profiles
+      allow delete: if false;
+    }
+    
+    // Groups collection - Authenticated users can only access their own groups
+    match /groups/{groupId} {
+      // Allow users to read their own groups
+      allow read: if isAuthenticated() && 
+                     resource.data.userId == request.auth.uid;
+      
+      // Allow authenticated users to create groups (with userId set)
+      allow create: if isAuthenticated() && 
+                       request.resource.data.userId == request.auth.uid &&
+                       request.resource.data.createdBy == request.auth.uid;
+      
+      // Allow users to update their own groups
+      allow update: if isAuthenticated() && 
+                       resource.data.userId == request.auth.uid;
+      
+      // Allow users to delete their own groups
+      allow delete: if isAuthenticated() && 
+                       resource.data.userId == request.auth.uid;
+    }
+    
+    // Payments collection - Users can only access payments for their groups
+    match /payments/{paymentId} {
+      // Allow users to read payments for their groups
+      allow read: if isAuthenticated();
+      
+      // Allow authenticated users to create payments
+      allow create: if isAuthenticated();
+      
+      // Allow users to update payments
+      allow update: if isAuthenticated();
+      
+      // Allow users to delete payments
+      allow delete: if isAuthenticated();
+    }
+    
+    // Settlements collection - Users can only access settlements for their groups
+    match /settlements/{settlementId} {
+      // Allow users to read settlements
+      allow read: if isAuthenticated();
+      
+      // Allow authenticated users to create settlements
+      allow create: if isAuthenticated();
+      
+      // Allow users to update settlements
+      allow update: if isAuthenticated();
+      
+      // Allow users to delete settlements
+      allow delete: if isAuthenticated();
+    }
+    
+    // Default rule - deny all other collections
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
