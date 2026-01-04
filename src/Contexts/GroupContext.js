@@ -70,34 +70,29 @@ function GroupProvider({ children }) {
   }, [groups]);
 
   const createGroup = useCallback(async (groupData) => {
-    // Create in Firebase first
     const result = await createGroupService(groupData);
 
     if (!result.success) {
       setError(result.error);
-      console.error("Error creating group:", result.error);
       return result;
     }
 
-    // Add a small delay to ensure Firebase real-time subscription catches up
-    // This prevents "group not found" errors when navigating immediately
-    await new Promise(resolve => setTimeout(resolve, 100));
+    // Wait for the group to appear in state via subscription
+    return new Promise((resolve) => {
+      const checkInterval = setInterval(() => {
+        if (groups.some(g => g.groupID === groupData.groupID)) {
+          clearInterval(checkInterval);
+          resolve(result);
+        }
+      }, 50);
 
-    // If group still not in state after delay, add it manually
-    setGroups((prev) => {
-      const exists = prev.some((g) => g.groupID === groupData.groupID);
-      if (exists) return prev; // Already added by subscription
-
-      // Add with Firebase fields structure
-      return [{
-        ...groupData,
-        createdAt: { toMillis: () => Date.now() }, // Temporary until subscription updates
-        updatedAt: { toMillis: () => Date.now() },
-      }, ...prev];
+      // Timeout after 5 seconds
+      setTimeout(() => {
+        clearInterval(checkInterval);
+        resolve(result);
+      }, 5000);
     });
-
-    return result;
-  }, []);
+  }, [groups]);
 
   const addPayment = useCallback(async (groupID, paymentData) => {
     // Optimistically add payment to local state

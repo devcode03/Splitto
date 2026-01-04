@@ -231,8 +231,7 @@ const Confirmation = memo(function Confirmation({ groupName, groupID }) {
   const groupURL = `${window.location.origin}/#/groupPage/${groupID}`;
 
   const handleNavigate = async () => {
-    // Wait briefly for real-time subscription to sync
-    await new Promise(resolve => setTimeout(resolve, 300));
+    // Navigate immediately - the Group page should handle loading state
     navigate(`/groupPage/${groupID}`);
   };
 

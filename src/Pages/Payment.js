@@ -49,7 +49,7 @@ export default function AddNewPayment() {
       setSelectedMembers(members.map((m) => m.name));
       setInitialized(true);
     }
-  }, [group, isEditMode, paymentID, initialized, payer]); // Fixed dependencies
+  }, [group, isEditMode, paymentID, initialized]); // Fixed dependencies
 
 
 
