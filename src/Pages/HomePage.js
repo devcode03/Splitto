@@ -1,46 +1,17 @@
 import { Link } from "react-router-dom";
 import cover from "../assets/cover.webp";
 import Button from "../Components/Button";
-import GroupList from "../Components/GroupList";
+import { memo } from "react";
 
-export default function HomePage({ children }) {
+export default function HomePage() {
   return (
     <div>
-      <HeroSection />
-      {children}
       <FeatureList />
     </div>
   );
 }
 
-function HeroSection() {
-  return (
-    <div>
-      <div className="hero">
-        <h1>
-          Simplify the calculation
-          <br />
-          of splitting group expenses
-          <br />
-        </h1>
-        <p>
-          Ever get confused about who owes whom how much money when you're
-          traveling with friends and dealing with expenses like rental cars and
-          tolls? Spliito is a free service that simplifies the hassle of
-          splitting bills on trips.
-        </p>
-        <div style={{ display: "flex", justifyContent: "center" }}>
-          <Link to="/newGroup" className="link-cta">
-            <Button>Get Started</Button>
-          </Link>
-        </div>
-      </div>
-      <img src={cover} alt="cover"></img>
-    </div>
-  );
-}
-
-function FeatureList() {
+const FeatureList = memo(function FeatureList() {
   const list = [
     {
       id: 1,
@@ -69,14 +40,15 @@ function FeatureList() {
     <section className="features">
       {list.map((li) => (
         <div className="feature" key={li.id}>
+          <h3>{li.feature}</h3>
+          <p>{li.description}</p>
           <img
             className="mx-auto"
             src={li.image}
             alt={"feaure" + li.id}
             style={{ width: "75%" }}
+            loading="lazy"
           />
-          <h3>{li.feature}</h3>
-          <p>{li.description}</p>
         </div>
       ))}
       <div
@@ -88,4 +60,4 @@ function FeatureList() {
       </div>
     </section>
   );
-}
+});

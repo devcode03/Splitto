@@ -4,27 +4,41 @@ import { useEffect, useRef, useState } from "react";
 import { useGroups } from "../Contexts/GroupContext";
 import { useCurrencyList } from "../Contexts/CurrencyContext";
 import { nanoid } from "nanoid";
+import ErrorPopup from "../Components/ErrorPopup";
+import Loading from "../Components/Loading";
 
 export default function EditGroup() {
   const navigate = useNavigate();
 
-  const { groups, updateGroup } = useGroups();
+  const { groups, updateGroup, loading } = useGroups();
   const currencyList = useCurrencyList();
   const { id } = useParams();
   const group = groups.find((g) => g.groupID === id);
-  const [groupName, setGroupName] = useState(group.name);
-  const [currency, setCurrency] = useState(group.currency);
+
+  const [groupName, setGroupName] = useState("");
+  const [currency, setCurrency] = useState({ code: "USD", symbol: "$", name: "US Dollar" });
   const [editMember, setEditMember] = useState(null); // {id, name}
   const [editName, setEditName] = useState("");
   const [newMemberName, setNewMemberName] = useState("");
-  const [members, setMembers] = useState(group?.members || []);
+  const [members, setMembers] = useState([]);
+  const [initialized, setInitialized] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [error, setError] = useState("");
 
   const inputRef = useRef();
 
+  // Initialize form when group loads - only once
   useEffect(() => {
-    setMembers(group?.members || []);
-  }, [group?.members]);
-  if (!group) return <div>Group not found</div>;
+    if (group && !initialized) {
+      setGroupName(group.name);
+      setCurrency(group.currency);
+      setMembers(group.members || []);
+      setInitialized(true);
+    }
+  }, [group, initialized]); // Fixed dependencies
+
+  if (loading) return <Loading fullScreen message="Loading group..." />;
+  if (!group) return <div style={{ padding: "2rem", textAlign: "center" }}>Group not found</div>;
 
   function openEditModal(member) {
     setEditMember(member);
@@ -53,7 +67,7 @@ export default function EditGroup() {
       m.id === editMember.id ? { ...m, name } : m
     );
     setMembers(updatedMembers);
-    updateGroup(group.groupID, { ...group, members: updatedMembers });
+    updateGroup(group.groupID, { members: updatedMembers });
     closeEditModal();
   }
   function handleMemberDelete() {
@@ -64,7 +78,7 @@ export default function EditGroup() {
     ) {
       const updatedMembers = members.filter((m) => m.id !== editMember.id);
       setMembers(updatedMembers);
-      updateGroup(group.groupID, { ...group, members: updatedMembers });
+      updateGroup(group.groupID, { members: updatedMembers });
       closeEditModal();
     }
   }
@@ -79,32 +93,52 @@ export default function EditGroup() {
     const newId = nanoid(8);
     const updatedMembers = [...members, { id: newId, name }];
     setMembers(updatedMembers);
-    updateGroup(group.groupID, { ...group, members: updatedMembers });
+    updateGroup(group.groupID, { members: updatedMembers });
     setNewMemberName("");
   }
   function handleUpdate(e) {
     e.preventDefault();
-    if (!groupName.trim()) return alert("Group name required");
-    if (!currency.code) return alert("Select a currency");
+    setError("");
+    if (!groupName.trim()) {
+      setError("Group name required");
+      return;
+    }
+    if (!currency.code) {
+      setError("Select a currency");
+      return;
+    }
     const duplicate = groups.some(
       (g) =>
         g.groupID !== group.groupID &&
         g.name.trim().toLowerCase() === groupName.trim().toLowerCase()
     );
     if (duplicate) {
-      alert("A group with this name already exists.");
+      setError("A group with this name already exists.");
       return;
     }
+
+    setIsUpdating(true);
     updateGroup(group.groupID, {
-      ...group,
       name: groupName.trim(),
       currency,
       members,
-    });
-    navigate(`/groupPage/${group.groupID}`);
+    })
+      .then((result) => {
+        setIsUpdating(false);
+        if (result.success) {
+          navigate(`/groupPage/${group.groupID}`);
+        } else {
+          setError(result.error || "Failed to update group");
+        }
+      })
+      .catch((err) => {
+        setIsUpdating(false);
+        setError("Failed to update group. Please try again.");
+      });
   }
   return (
     <div className={"bg-a0"} style={{ padding: "2rem" }}>
+      <ErrorPopup message={error} onClose={() => setError("")} />
       <EditMemberModal
         member={editMember}
         editName={editName}
@@ -214,7 +248,9 @@ export default function EditGroup() {
               justifyContent: "space-evenly",
             }}
           >
-            <Button>Update</Button>
+            <Button disabled={isUpdating}>
+              {isUpdating ? "Updating..." : "Update"}
+            </Button>
             <Link
               style={{ background: "var(--clr-surface-a40)" }}
               to={`/groupPage/${group.groupID}`}

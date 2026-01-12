@@ -4,6 +4,10 @@ import { GroupProvider } from "./Contexts/GroupContext";
 import "./styles/index.css";
 import App from "./App";
 import { CurrencyProvider } from "./Contexts/CurrencyContext";
+
+// Import Firebase test utility (available in browser console as window.testFirebase())
+import "./services/firebase/testConnection";
+
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>

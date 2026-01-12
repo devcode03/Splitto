@@ -5,31 +5,40 @@ import {
   calculateBalances,
   minimizeCashFlow,
 } from "../Utils/calculateBalances";
-import { useMemo, useState } from "react";
+import { useMemo, useState, memo } from "react";
 import ErrorPopup from "../Components/ErrorPopup";
+import Loading from "../Components/Loading";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faDollarSign, faMoneyBill, faCircleCheck } from '@fortawesome/free-solid-svg-icons';
 
 export default function Group() {
-  const { groups } = useGroups();
+  const { groups, loading } = useGroups();
   const { id } = useParams();
   const [error, setError] = useState("");
   const group = groups.find((g) => g.groupID === id);
 
-  const { payments = [], members = [], currency, name } = group;
+  const { payments = [], members = [], currency } = group || {};
   const hasPayments = payments.length > 0;
 
-  const { balances, transactions } = useMemo(() => {
-    if (!hasPayments)
-      return { balances: {}, transactions: [], minimizedTransactions: [] };
+  const { transactions } = useMemo(() => {
+    if (!hasPayments || !group)
+      return { balances: {}, transactions: [] };
     const balances = calculateBalances(payments, members);
     const transactions = minimizeCashFlow(balances);
     return { balances, transactions };
-  }, [payments, members, hasPayments]);
+  }, [payments, members, hasPayments, group]);
+
+  // Show loading state
+  if (loading) {
+    return <Loading fullScreen message="Loading group..." />;
+  }
+
   // Show error if group is not found
   if (!group) {
     return (
       <>
         <ErrorPopup message={"Group not found!"} onClose={() => setError("")} />
-        <div>Loading...</div>
+        <div style={{ padding: "2rem", textAlign: "center" }}>Group not found</div>
       </>
     );
   }
@@ -45,7 +54,7 @@ export default function Group() {
               className="link-cta"
               style={{ marginTop: "1.25rem" }}
             >
-              <Button>Add a payment💲</Button>
+              <Button>Add a payment <FontAwesomeIcon icon={faDollarSign} /></Button>
             </Link>
           </div>
           {!hasPayments && <NewRegisterMsg />}
@@ -58,11 +67,11 @@ export default function Group() {
     </>
   );
 }
-function GroupHeader({ group }) {
+const GroupHeader = memo(function GroupHeader({ group }) {
   let memberNames = [];
   if (Array.isArray(group.members)) {
     memberNames = group.members.map((m) => m.name || m.Name);
-  } else if (typeof members === "object" && group.members !== null) {
+  } else if (typeof group.members === "object" && group.members !== null) {
     memberNames = Object.values(group.members).map((m) => m.name || m.Name);
   }
   return (
@@ -70,26 +79,25 @@ function GroupHeader({ group }) {
       <div className="group-name">
         <h1>{group.name}</h1>
         <Link className="edit-main-btn" to={`/newGroup/${group.groupID}/edit`}>
-          <a>
-            <svg
-              stroke="currentColor"
-              fill="currentColor"
-              strokeWidth="0"
-              viewBox="0 0 24 24"
-              height="1.5em"
-              width="1.5em"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path d="M3 17.25V21h3.75l11.06-11.06-3.75-3.75L3 17.25zM20.71 7.04a1.003 1.003 0 0 0 0-1.42l-2.34-2.34a1.003 1.003 0 0 0-1.42 0l-1.83 1.83 3.75 3.75 1.84-1.82z"></path>
-            </svg>
-          </a>
+          <svg
+            stroke="currentColor"
+            fill="currentColor"
+            strokeWidth="0"
+            viewBox="0 0 24 24"
+            height="1.5em"
+            width="1.5em"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path d="M3 17.25V21h3.75l11.06-11.06-3.75-3.75L3 17.25zM20.71 7.04a1.003 1.003 0 0 0 0-1.42l-2.34-2.34a1.003 1.003 0 0 0-1.42 0l-1.83 1.83 3.75 3.75 1.84-1.82z"></path>
+          </svg>
         </Link>
       </div>
       <span>{memberNames.join(" • ")}</span>
     </div>
   );
-}
-function NewRegisterMsg() {
+});
+
+const NewRegisterMsg = memo(function NewRegisterMsg() {
   return (
     <div style={{ padding: "1.25rem" }}>
       <div
@@ -124,9 +132,9 @@ function NewRegisterMsg() {
       </div>
     </div>
   );
-}
+});
 
-function PaymentDetails({ payments, currency, id }) {
+const PaymentDetails = memo(function PaymentDetails({ payments, currency, id }) {
   if (!payments.length) return null;
 
   return (
@@ -163,30 +171,28 @@ function PaymentDetails({ payments, currency, id }) {
               to={`/addPayment/${id}/edit?paymentID=${p.id}`}
               style={{ textDecoration: "none", color: "var(--clr-light-a0)" }}
             >
-              <a>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  aria-hidden="true"
-                  className="mx-auto"
-                  width="20"
-                  display="block"
-                >
-                  <path d="M21.731 2.269a2.625 2.625 0 00-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 000-3.712zM19.513 8.199l-3.712-3.712-12.15 12.15a5.25 5.25 0 00-1.32 2.214l-.8 2.685a.75.75 0 00.933.933l2.685-.8a5.25 5.25 0 002.214-1.32L19.513 8.2z"></path>
-                </svg>
-              </a>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                aria-hidden="true"
+                className="mx-auto"
+                width="20"
+                display="block"
+              >
+                <path d="M21.731 2.269a2.625 2.625 0 00-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 000-3.712zM19.513 8.199l-3.712-3.712-12.15 12.15a5.25 5.25 0 00-1.32 2.214l-.8 2.685a.75.75 0 00.933.933l2.685-.8a5.25 5.25 0 002.214-1.32L19.513 8.2z"></path>
+              </svg>
             </Link>
           </div>
         </div>
       ))}
     </div>
   );
-}
+});
 
-function TransactionsDetls({ transactions, currency }) {
+const TransactionsDetls = memo(function TransactionsDetls({ transactions, currency }) {
   if (!transactions.length) {
-    return <div className="settled-message">💰 Settled! 🎉</div>;
+    return <div className="settled-message"><FontAwesomeIcon icon={faMoneyBill} /> Settled! <FontAwesomeIcon icon={faCircleCheck} /> /></div>;
   }
   return (
     <>
@@ -213,4 +219,4 @@ function TransactionsDetls({ transactions, currency }) {
       </div>
     </>
   );
-}
+});

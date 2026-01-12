@@ -1,50 +1,102 @@
 import Header from "./Components/Header";
 import Footer from "./Components/Footer";
-import HomePage from "./Pages/HomePage";
-// import NewGroup from "./Pages/NewGroup";
-import NewGroup from "./Pages/NewGroup-v2";
-
-import Group from "./Pages/Group";
-import { useState } from "react";
+import Loading from "./Components/Loading";
+import PrivateRoute from "./Components/PrivateRoute";
+import { lazy, Suspense } from "react";
 import { HashRouter as Router, Routes, Route } from "react-router-dom";
-import AddNewPayment from "./Pages/Payment";
-import GroupList from "./Components/GroupList";
-import EditGroup from "./Pages/EditGroup";
-import FAQ from "./Components/FAQ";
-import Contact from "./Components/Contact";
-import PrivacyPolicy from "./Components/PrivacyPolicy";
-import Terms from "./Components/TermsAndConditions";
-import About from "./Components/AboutUs";
+import { AuthProvider } from "./Contexts/AuthContext";
+
+// Lazy load route components for better code splitting
+const HomePage = lazy(() => import("./Pages/HomePage"));
+const NewGroup = lazy(() => import("./Pages/NewGroup-v2"));
+const Group = lazy(() => import("./Pages/Group"));
+const AddNewPayment = lazy(() => import("./Pages/Payment"));
+const GroupList = lazy(() => import("./Components/GroupList"));
+const EditGroup = lazy(() => import("./Pages/EditGroup"));
+const FAQ = lazy(() => import("./Components/FAQ"));
+const Contact = lazy(() => import("./Components/Contact"));
+const PrivacyPolicy = lazy(() => import("./Components/PrivacyPolicy"));
+const Terms = lazy(() => import("./Components/TermsAndConditions"));
+const About = lazy(() => import("./Components/AboutUs"));
+const Login = lazy(() => import("./Pages/Login"));
+const Signup = lazy(() => import("./Pages/Signup"));
+const ForgotPassword = lazy(() => import("./Pages/ForgotPassword"));
 
 export default function App() {
   return (
     <Router>
-      <div className=" mx-auto App">
-        <Header reset />
-        <div style={{ minHeight: "80vh" }}>
-          <Routes>
-            <Route
-              index
-              element={
-                <HomePage>
-                  <GroupList />
-                </HomePage>
-              }
-            />
-            <Route path="newGroup" element={<NewGroup />} />
-            <Route path="groupPage/:id" element={<Group />} />
-            <Route path="newGroup/:id/edit" element={<EditGroup />} />
-            <Route path="addPayment/:id" element={<AddNewPayment />} />
-            <Route path="addPayment/:id/edit" element={<AddNewPayment />} />
-            <Route path="faq" element={<FAQ />} />
-            <Route path="contact" element={<Contact />} />
-            <Route path="privacy" element={<PrivacyPolicy />} />
-            <Route path="terms" element={<Terms />} />
-            <Route path="about" element={<About />} />
-          </Routes>
+      <AuthProvider>
+        <div className=" mx-auto App">
+          <Header reset />
+          <div style={{ minHeight: "80vh" }}>
+            <Suspense fallback={<Loading fullScreen message="Loading page..." />}>
+              <Routes>
+                {/* Public Routes */}
+                <Route path="login" element={<Login />} />
+                <Route path="signup" element={<Signup />} />
+                <Route path="forgot-password" element={<ForgotPassword />} />
+                <Route path="faq" element={<FAQ />} />
+                <Route path="contact" element={<Contact />} />
+                <Route path="privacy" element={<PrivacyPolicy />} />
+                <Route path="terms" element={<Terms />} />
+                <Route path="about" element={<About />} />
+
+                {/* Protected Routes */}
+                <Route
+                  index
+                  element={
+                    <PrivateRoute>
+                      <GroupList />
+                      <HomePage />
+                    </PrivateRoute>
+                  }
+                />
+                <Route
+                  path="newGroup"
+                  element={
+                    <PrivateRoute>
+                      <NewGroup />
+                    </PrivateRoute>
+                  }
+                />
+                <Route
+                  path="groupPage/:id"
+                  element={
+                    <PrivateRoute>
+                      <Group />
+                    </PrivateRoute>
+                  }
+                />
+                <Route
+                  path="newGroup/:id/edit"
+                  element={
+                    <PrivateRoute>
+                      <EditGroup />
+                    </PrivateRoute>
+                  }
+                />
+                <Route
+                  path="addPayment/:id"
+                  element={
+                    <PrivateRoute>
+                      <AddNewPayment />
+                    </PrivateRoute>
+                  }
+                />
+                <Route
+                  path="addPayment/:id/edit"
+                  element={
+                    <PrivateRoute>
+                      <AddNewPayment />
+                    </PrivateRoute>
+                  }
+                />
+              </Routes>
+            </Suspense>
+          </div>
+          <Footer />
         </div>
-        <Footer />
-      </div>
+      </AuthProvider>
     </Router>
   );
 }
